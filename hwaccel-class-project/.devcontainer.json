@@ -1,0 +1,20 @@
+{
+  "image": "simbricks/simbricks:hwaccel-course",
+  "runArgs": [
+    "--platform=linux/amd64",
+    "--device=/dev/kvm",
+    "--privileged"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-vscode.cpptools",
+        "ms-vscode.makefile-tools",
+        "mshr-h.veriloghdl"
+      ]
+    }
+  },
+  "remoteUser": "simbricks",
+  "onCreateCommand": "sudo make -C /simbricks convert-images-raw; sudo chmod o+rw /dev/kvm "
+}

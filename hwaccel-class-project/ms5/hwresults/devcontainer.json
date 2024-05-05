@@ -1,0 +1,4 @@
+{
+  "image": "simbricks/hwaccel-openlane:latest",
+  "onCreateCommand": "/entrypoint.sh"
+}

@@ -1,0 +1,34 @@
+{
+    "//": "Basics",
+    "DESIGN_NAME": "top",
+    "VERILOG_FILES": "dir::src/*.v",
+    "CLOCK_PERIOD": 10,
+    "CLOCK_PORT": "clk",
+    "PNR_SDC_FILE": "dir::top.sdc",
+    "SIGNOFF_SDC_FILE": "dir::top.sdc",
+    "//": "get flow to fail after floorplanning",
+    "FP_PDN_CFG": "foobar",
+    "RUN_DRT": false,
+    "RUN_SPEF_EXTRACTION": false,
+    "RUN_IRDROP_REPORT": false,
+    "RUN_MAGIC": false,
+    "RUN_KLAYOUT": false,
+    "RUN_LVS": false,
+    "//": "PDN",
+    "FP_PDN_VOFFSET": 5,
+    "FP_PDN_HOFFSET": 5,
+    "FP_PDN_VWIDTH": 2,
+    "FP_PDN_HWIDTH": 2,
+    "FP_PDN_VPITCH": 30,
+    "FP_PDN_HPITCH": 30,
+    "FP_PDN_SKIPTRIM": true,
+    "//": "Pin Order",
+    "FP_PIN_ORDER_CFG": "dir::pin_order.cfg",
+    "//": "Technology-Specific Configs",
+    "pdk::sky130*": {
+        "FP_CORE_UTIL": 40,
+        "scl::sky130_fd_sc_ls": {
+            "MAX_FANOUT_CONSTRAINT": 5
+        }
+    }
+}
