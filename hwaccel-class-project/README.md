@@ -14,7 +14,7 @@ depending on your distro.  We recommend the server version instead of the
 desktop version here (although desktop "should" work too, but we did not test
 this). The [docker documentation](https://docs.docker.com/engine/install/) has
 instructions for some of them. For more exotic distributions you should consult
-your distro documentaiton.
+your distro documentation.
 
 To run the tests you will need a system with kvm virtualization available and
 enabled. You only need the kernel support (among other things `/dev/kvm` has to
@@ -39,6 +39,8 @@ Here as well you would need at least a working
 ## Using the Environment
 The project repository is set up with a [dev container](https://containers.dev/)
 configuration file that makes running the container environment relatively easy.
+The [configuration file](../.devcontainer.json) is located in the root directory
+of this repository.
 
 ### vscode
 The easiest way to use this is with [vscode](https://code.visualstudio.com/) and
@@ -65,7 +67,7 @@ other commands if you just want to run an individual command.
 ### Manually running container
 Note that devcontainers cli goes quite a bit beyond just `docker run`. Instead
 this will set up a user with a correct UID for a user in the container matching
-yours, mount the worspace directory in the container, and run additional
+yours, mount the workspace directory in the container, and run additional
 initialization commands. If you are masochistic enough you can in principle do
 this manually as well, but this is at your own risk. ;-)
 

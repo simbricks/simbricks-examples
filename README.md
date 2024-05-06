@@ -3,6 +3,14 @@
 This repository contains various examples for how to use
 [SimBricks](https://github.com/simbricks/simbricks).
 
+The repository is set up with a [dev container](https://containers.dev/)
+configuration file that makes running the examples in a container environment
+relatively easy. The easiest way to use this is with
+[vscode](https://code.visualstudio.com/) and its
+[Dev Containers Extension](vscode:extension/ms-vscode-remote.remote-containers).
+The [hwaccel-class-project/README.md](hwaccel-class-project/README.md) contains
+some instructions on how to set this up.
+
 ## Hardware Acceleration Class Project
 
 In this class project you will learn about various aspects of hardware

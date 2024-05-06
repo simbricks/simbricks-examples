@@ -211,7 +211,7 @@ devcontainer image. So to obtain the numbers, you need to start by switching
 your devcontainer image and rebuilding & restarting the container in vscode:
 
 ```
-$ cp hwresults/devcontainer.json ../.devcontainer.json
+$ cp hwresults/devcontainer.json ../../.devcontainer.json
 ```
 
 After this, vscode should prompt you to rebuild the container. This will take a
@@ -236,7 +236,7 @@ take a lot longer (a few hours).
 
 Afterwards, remember to switch back to the original devcontainer and rebuild:
 ```
-git checkout ../.devcontainer.json
+git checkout ../../.devcontainer.json
 ```
 
 # Step 5: Examine End-to-End System Performance
