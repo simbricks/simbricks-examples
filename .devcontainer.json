@@ -1,5 +1,5 @@
 {
-  "image": "simbricks/simbricks-min",
+  "image": "simbricks/simbricks",
   "runArgs": [
     "--platform=linux/amd64",
     "--device=/dev/kvm",
