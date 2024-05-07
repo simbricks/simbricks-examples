@@ -29,4 +29,10 @@ of this repository. All necessary information can be found in the respective
 `README.md` files, starting with
 [hwaccel-class-project/README.md](hwaccel-class-project/README.md)
 
-## TODO: add other examples
+## Memcached Example
+
+This is a small SimBricks experiment using [memcached](https://memcached.org/). 
+This requires different images from the ones provided by the included 
+[devcontainer](https://github.com/simbricks/simbricks-examples/blob/main/.devcontainer.json).
+The purpose of this small example is to show SimBricks users how to build images 
+out-of-tree and use them alongside SimBricks.
