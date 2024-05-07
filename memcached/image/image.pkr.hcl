@@ -11,7 +11,7 @@ variable "memory" {
 
 variable "outname" {
   type    = string
-  default = "memcache"
+  default = "memcached"
 }
 
 variable "base_img" {
