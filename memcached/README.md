@@ -34,5 +34,5 @@ a user can simply set the `disk_image` property of the involved host simulators
 [node config](https://simbricks.readthedocs.io/en/latest/user/orchestration.html)
 to an **absolute** path pointing to the actual image file located under `output-memcached`.
 An example can be seen in the given `experiment/memcached-experiment.py` SimBricks 
-simulation script.
+simulation script [here](https://github.com/simbricks/simbricks-examples/blob/f7d3500bc1c2d32bc4eb62a8b22637ba39797921/memcached/experiment/memcached-experiment.py#L55C1-L55C95).
 
