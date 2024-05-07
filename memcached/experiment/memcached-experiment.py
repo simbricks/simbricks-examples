@@ -52,7 +52,7 @@ e.add_nic(server_nic)
 server_config = I40eLinuxNode()  # boot Linux with i40e NIC driver
 server_config.ip = '10.0.0.2'
 server_config.app = MemcachedServer()
-server_config.disk_image='memcached' # TODO
+server_config.disk_image='/workspaces/simbricks-examples/memcached/output-memcached/memcached'
 server = Gem5Host(server_config)
 server.name = 'server'
 server.add_nic(server_nic)
@@ -69,7 +69,7 @@ e.add_nic(client_nic)
 client_config = I40eLinuxNode()  # boot Linux with i40e NIC driver
 client_config.ip = '10.0.0.1'
 client_config.app = MemcachedClient()
-client_config.disk_image='memcached' # TODO
+client_config.disk_image='/workspaces/simbricks-examples/memcached/output-memcached/memcached'
 client_config.app.server_ips = [server_config.ip]
 client = Gem5Host(client_config)
 client.name = 'client'

@@ -37,6 +37,10 @@ $(IMAGE): packer image/image.pkr.hcl image/install.sh image/cleanup.sh
 	rm -rf input-memcached
 	touch $@
 
+.PHONY: convert-raw-images
+convert-raw-images: $(IMAGE)
+	qemu-img convert -f qcow2 -O raw $(IMAGE) $(IMAGE).raw
+
 packer:
 	wget -O packer_$(PACKER_VERSION)_linux_amd64.zip \
 	    https://releases.hashicorp.com/packer/$(PACKER_VERSION)/packer_$(PACKER_VERSION)_linux_amd64.zip
@@ -44,8 +48,8 @@ packer:
 	rm -f packer_$(PACKER_VERSION)_linux_amd64.zip
 
 clean:
-	rm -rf output-memcached input-memcached packer packer-cache
+	rm -rf output-memcached input-memcached packer packer_cache out
 
 .PHONY: run
-run: $(IMAGE)
+run: $(IMAGE) convert-raw-images
 	simbricks-run --verbose --force experiment/memcached-experiment.py
