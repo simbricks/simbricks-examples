@@ -1,6 +1,6 @@
 # SimBricks Examples
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](simbricks/simbricks-examples)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/simbricks/simbricks-examples/?quickstart=1)
 
 This repository contains a series of examples showing how to use
 [SimBricks](https://github.com/simbricks/simbricks).
