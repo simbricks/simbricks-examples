@@ -1,5 +1,5 @@
 {
-  "image": "simbricks/simbricks",
+  "image": "simbricks/simbricks-examples",
   "runArgs": [
     "--platform=linux/amd64",
     "--device=/dev/kvm",
@@ -11,7 +11,8 @@
         "ms-python.python",
         "ms-vscode.cpptools",
         "ms-vscode.makefile-tools",
-        "mshr-h.veriloghdl"
+        "mshr-h.veriloghdl",
+        "ms-toolsai.jupyter"
       ]
     }
   },
