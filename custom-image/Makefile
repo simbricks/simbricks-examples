@@ -23,23 +23,19 @@
 
 PACKER_VERSION := 1.7.0
 
-IMAGE := $(d)output-memcached/memcached
+IMAGE := output-memcached/memcached
 
 all: run
 
 %.raw: %
-	$(QEMU_IMG) convert -f qcow2 -O raw $< $@
+	qemu-img convert -f qcow2 -O raw $< $@
 
 $(IMAGE): packer image/image.pkr.hcl image/install.sh image/cleanup.sh
 	rm -rf $(dir $@)
 	mkdir -p input-memcached
-	./packer build image/image.pkr.hcl
+	./packer build -var="syscores=`nproc`" image/image.pkr.hcl
 	rm -rf input-memcached
 	touch $@
-
-.PHONY: convert-raw-images
-convert-raw-images: $(IMAGE)
-	qemu-img convert -f qcow2 -O raw $(IMAGE) $(IMAGE).raw
 
 packer:
 	wget -O packer_$(PACKER_VERSION)_linux_amd64.zip \
@@ -47,9 +43,13 @@ packer:
 	unzip packer_$(PACKER_VERSION)_linux_amd64.zip
 	rm -f packer_$(PACKER_VERSION)_linux_amd64.zip
 
+.PHONY: clean
 clean:
 	rm -rf output-memcached input-memcached packer packer_cache out
 
-.PHONY: run
-run: $(IMAGE) convert-raw-images
-	simbricks-run --verbose --force experiment/memcached-experiment.py
+.PHONY: run-qemu
+run-qemu: $(IMAGE)
+	simbricks-run --verbose --force --filter=memcached-qemu memcached.py
+
+run-gem5: $(IMAGE).raw
+	simbricks-run --verbose --force --filter=memcached-gem5 memcached.py
