@@ -26,13 +26,36 @@ through a switch. The server runs memcached, and the client the memaslap client.
 """
 
 import os
+import typing as tp
 from simbricks.orchestration.experiments import Experiment
 from simbricks.orchestration.nodeconfig import (
-    I40eLinuxNode, MemcachedServer, MemcachedClient
+    I40eLinuxNode, NodeConfig, AppConfig
 )
 from simbricks.orchestration.simulators import (
     Gem5Host, I40eNIC, QemuHost, SwitchNet
 )
+
+# define a new application config for our memcached server
+class MemcachedServer(AppConfig):
+
+    def run_cmds(self, node: NodeConfig) -> tp.List[str]:
+        return ['memcached -u root -t 1 -c 4096']
+
+# define a new application config for our memcached client
+class MemcachedClient(AppConfig):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.server_ips = ['10.0.0.1']
+
+    def run_cmds(self, node: NodeConfig) -> tp.List[str]:
+        servers = [ip + ':11211' for ip in self.server_ips]
+        servers = ','.join(servers)
+        return [(
+            f'memaslap --binary --time 2s --server={servers}'
+            f' --thread=1 --concurrency=1'
+            f' --tps=1k --verbose'
+        )]
 
 mc_image = os.path.abspath('output-memcached/memcached')
 
