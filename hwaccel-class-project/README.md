@@ -22,3 +22,6 @@ milestone (generous skeleton code with all plumbing), but not the solutions,
 since we plan to re-use these course projects again.*
 
 We originally used this projects for https://cms.sic.saarland/hwaccel_23/.
+
+Finally, please feel free to contact Antoine Kaufmann <antoinek@mpi-sws.org> if
+you are interested in using these in your teaching.
