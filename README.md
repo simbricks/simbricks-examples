@@ -14,6 +14,14 @@ The easiest way to use this is with
 [Dev Containers Extension](vscode:extension/ms-vscode-remote.remote-containers)
 ([details on setup](#environment-setup))
 
+## First Steps
+Under [`first-steps/first_steps.ipynb`](first-steps/first_steps.ipynb) you will
+find an iPython Notebook with an interactive introductions for your first steps
+with SimBricks. This introduces the basic concepts for how to configure and run
+SimBricks simulations. For initial quick playing around, you can even
+[immediately open this in the browser with
+mybinder](https://mybinder.org/v2/gh/simbricks/labs/main?urlpath=git-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252Fsimbricks%252Fsimbricks-examples%26urlpath%3Dlab%252Ftree%252Fsimbricks-examples%252Ffirst-steps%252Ffirst_steps.ipynb%26branch%3Dmain)
+(although there you will not have enough compute for anything interesting).
 
 ## Example: Custom Images
 Any non-trivial project will typically require you to set up custom disk images
@@ -48,16 +56,11 @@ virtualization available and enabled. You only need kernel support (among other
 things `/dev/kvm` has to exist), but no user space qemu-kvm setup etc. is
 required.
 
-Set `/proc/sys/kernel/perf_event_paranoid` to `1` or less, so that gem5 can
-access CPU performance counters.
-([Linux Kernel Docs](https://www.kernel.org/doc/Documentation/sysctl/kernel.txt)
-have more detail on what this does).
 
 ### Windows
 You need to install
 [docker desktop](https://docs.docker.com/desktop/install/windows-install/).
-We have tested with the WSL2 backend. Under Windows you will have to run
-`sudo echo 1 >/proc/sys/kernel/perf_event_paranoid` *inside the container*.
+We have tested with the WSL2 backend.
 
 ### OS X
 Here as well you would need at least a working
@@ -91,4 +94,10 @@ Note that devcontainers cli goes quite a bit beyond just `docker run`. Instead
 this will set up a user with a correct UID for a user in the container matching
 yours, mount the workspace directory in the container, and run additional
 initialization commands. But you can do this manually too, if you prefer, in
-which case you can directly use the `simbricks/simbricks` docker image.
+which case you can directly use the
+[`simbricks/simbricks-examples` docker image](https://hub.docker.com/r/simbricks/simbricks-examples). This image just extends the `simbricks/simbricks` image
+some development tools (including ipython).
+
+###
+Finally, you can of course also build everything locally. For that please refer
+to the [README in the main SimBricks repo](https://github.com/simbricks/simbricks/blob/main/README.md).
