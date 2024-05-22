@@ -11,7 +11,8 @@
         "ms-vscode.cpptools",
         "ms-vscode.makefile-tools",
         "mshr-h.veriloghdl",
-        "ms-toolsai.jupyter"
+        "ms-toolsai.jupyter",
+        "surfer-project.surfer"
       ]
     }
   },
