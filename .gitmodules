@@ -1,0 +1,3 @@
+[submodule "hwaccel-jpeg-decoder/rtl"]
+	path = hwaccel-jpeg-decoder/rtl
+	url = https://github.com/simbricks/jpeg_decoder.git

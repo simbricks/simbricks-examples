@@ -39,6 +39,14 @@ Verilog-RTL implementation. The example is split up in multiple project
 milestones with step-by-step instructions, for the different development stages.
 Start [here](hwaccel-class-project/README.md)
 
+## Example: Hardware Acceleration JPEG Decoder
+
+You can plug your own RTL into SimBricks for end-to-end evaluation or for
+full-system integration testing instead of writing complex Verilog testbenches.
+Here, we integrate an [open-source Verilog JPEG
+decoder](https://github.com/ultraembedded/core_jpeg_decoder) as a PCIe-based HW
+accelerator along with the necessary user-space driver.
+
 
 ## Environment Setup
 This repository is set up with a devcontainer configuration based on the
