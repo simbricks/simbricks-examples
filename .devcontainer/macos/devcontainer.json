@@ -1,0 +1,19 @@
+{
+  "image": "simbricks/simbricks-examples",
+  "runArgs": [
+    "--platform=linux/amd64"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-vscode.cpptools",
+        "ms-vscode.makefile-tools",
+        "mshr-h.veriloghdl",
+        "ms-toolsai.jupyter"
+      ]
+    }
+  },
+  "remoteUser": "simbricks",
+  "onCreateCommand": "sudo make -C /simbricks convert-images-raw"
+}
