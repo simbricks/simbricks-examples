@@ -2,8 +2,7 @@
   "image": "simbricks/simbricks-examples",
   "runArgs": [
     "--platform=linux/amd64",
-    "--device=/dev/kvm",
-    "--privileged"
+    "--device=/dev/kvm"
   ],
   "customizations": {
     "vscode": {
