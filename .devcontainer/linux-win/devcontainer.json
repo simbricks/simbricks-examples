@@ -16,5 +16,6 @@
     }
   },
   "remoteUser": "simbricks",
-  "onCreateCommand": "sudo make -C /simbricks convert-images-raw; sudo chmod o+rw /dev/kvm "
+  "onCreateCommand": "sudo make -C /simbricks convert-images-raw",
+  "postStartCommand": "sudo chmod o+rw /dev/kvm "
 }
