@@ -1,4 +1,5 @@
 FROM simbricks/simbricks
+ENV TZ=Europe/Berlin
 RUN apt-get update \
  && apt-get install -y \
 	git \
