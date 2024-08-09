@@ -28,11 +28,11 @@ LIB_SIMBRICKS := /simbricks/lib/libsimbricks.a
 all: pci_driver jpeg_decoder_verilator
 
 .PHONY: run-qemu
-run-qemu:
+run-qemu: pci_driver jpeg_decoder_verilator
 	simbricks-run --verbose --force --filter=jpeg_decoder-qemu jpeg_decoder_exp.py
 
 .PHONY: run-gem5
-run-gem5:
+run-gem5: pci_driver jpeg_decoder_verilator
 	simbricks-run --verbose --force --filter=jpeg_decoder-gem5 jpeg_decoder_exp.py
 
 .PHONY: process-out-qemu
