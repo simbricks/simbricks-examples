@@ -28,7 +28,7 @@ def add_host_to_topo_left(topo, host_name, nic, unsynchronized):
         host.sync = e2e.SimbricksSyncMode.SYNC_DISABLED
     host.eth_latency = "1us"
     host.simbricks_component = nic
-    topology.add_left_component(host)
+    topo.add_left_component(host)
 
 def add_host_to_topo_right(topo, host_name, nic, unsynchronized):
     host = e2e.E2ESimbricksHost(host_name)
@@ -36,4 +36,4 @@ def add_host_to_topo_right(topo, host_name, nic, unsynchronized):
         host.sync = e2e.SimbricksSyncMode.SYNC_DISABLED
     host.eth_latency = "1us"
     host.simbricks_component = nic
-    topology.add_right_component(host)
+    topo.add_right_component(host)
