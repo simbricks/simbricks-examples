@@ -38,7 +38,6 @@ from helpers import (
     add_host_to_topo_left,
     add_host_to_topo_right,
     get_host_class,
-    get_nic_class_and_node,
     init_ns3_net,
     init_ns3_dumbbell_topo,
 )
@@ -49,11 +48,10 @@ link_rate = 200  # in Mbps
 link_latency = 5  # in ms
 bdp = int(link_rate * link_latency / 1000 * 10**6)  # Bandwidth-delay product
 ip_start = "192.168.64.1"
-num_ns3_hosts = 0
-nic_type = "cv"  # one of: 'cv', 'cb'
 # (amount, host_type), host_type one of qt, gt, qemu,
 hos_conf = [(1, "qt"), (1, "gt")]
 total_simbricks_hosts = reduce(lambda prev, cur: prev + cur[0], hos_conf, 0)
+num_ns3_hosts = 1
 
 # sanity check and check sync
 unsynchronized = False
@@ -98,11 +96,8 @@ for i in range(1, num_ns3_hosts + 1):
     topology.add_right_component(host)
 
 # create the actual experiment instance
-e = exp.Experiment("-".join([h[1] for h in hos_conf]) + "-" + nic_type + "-Host")
+e = exp.Experiment("-".join([h[1] for h in hos_conf]) + "-Host")
 e.add_network(net)
-
-# create nic class and node config to use
-NicClass, NcClass = get_nic_class_and_node(nic_type)
 
 # create "proper" simulated servers and clients
 ip_start = num_ns3_hosts + 1
@@ -110,11 +105,12 @@ servers = []
 server_index = 1
 for hos in hos_conf:
     for i in range(0, hos[0]):
-        nic = NicClass()
-        nic.name = nic_type
+        nic = sim.CorundumVerilatorNIC()
+        nic.name = "cor-ver"
         nic.set_network(net)
 
-        node_config = NcClass()
+        node_config = node.CorundumLinuxNode()
+        node_config.memory = 2048
         node_config.prefix = 24
         ip = ip_start + i
         node_config.ip = f"10.0.{int(ip / 256)}.{ip % 256}"
@@ -140,11 +136,12 @@ clients = []
 client_index = 1
 for hos in hos_conf:
     for i in range(0, hos[0]):
-        nic = NicClass()
-        nic.name = nic_type
+        nic = sim.CorundumVerilatorNIC()
+        nic.name = "cor-ver"
         nic.set_network(net)
 
-        node_config = NcClass()
+        node_config = node.CorundumLinuxNode()
+        node_config.memory = 2048
         node_config.prefix = 24
         ip = ip_start + i
         node_config.ip = f"10.0.{int(ip / 256)}.{ip % 256}"
