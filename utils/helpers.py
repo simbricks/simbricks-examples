@@ -40,20 +40,20 @@ def get_host_class(experiment, host_type):
         HostClass = qemu_timing
     elif host_type == "gt":
         HostClass = sim.Gem5Host
-        # e.checkpoint = True
     else:
         raise NameError(host_type)
     return HostClass
 
 
+def corundum_linux_node():
+    nc = node.CorundumLinuxNode()
+    nc.memory = 2048
+    return nc
+
+
 # helper method to create NicClass and NodeConfig
 # NOTE: the node is important as it provides drivers etc. needed to interface the NIC
 def get_nic_class_and_node(nic_type):
-    def corundum_linux_node():
-        nc = node.CorundumLinuxNode()
-        nc.memory = 2048
-        return nc
-
     NicClass = None
     NcClass = None
     if nic_type == "ib":
