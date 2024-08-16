@@ -34,6 +34,7 @@ import sys
 
 sys.path.insert(0, "/workspaces/simbricks-examples/utils")
 from visualize import experiment_graph_e2e_dumbbell
+from e2e_topo_helpers import add_host_to_topo_left, add_host_to_topo_right
 
 
 # helper method to create the HostClass
@@ -60,6 +61,11 @@ def get_host_class(experiment, host_type):
 # helper method to create NicClass and NodeConfig
 # NOTE: the node is important as it provides drivers etc. needed to interface the NIC
 def get_nic_class_and_node(nic_type):
+    def corundum_linux_node():
+        nc = node.CorundumLinuxNode()
+        nc.memory = 2048
+        return nc
+
     NicClass = None
     NcClass = None
     if nic_type == "ib":
@@ -67,10 +73,10 @@ def get_nic_class_and_node(nic_type):
         NcClass = node.I40eLinuxNode
     elif nic_type == "cb":
         NicClass = sim.CorundumBMNIC
-        NcClass = node.CorundumLinuxNode
+        NcClass = corundum_linux_node
     elif nic_type == "cv":
         NicClass = sim.CorundumVerilatorNIC
-        NcClass = node.CorundumLinuxNode
+        NcClass = corundum_linux_node
     else:
         raise NameError(nic_type)
     return NicClass, NcClass
@@ -86,7 +92,7 @@ ip_start = "192.168.64.1"
 num_ns3_hosts = 0
 nic_type = "cv"  # one of: 'cv', 'cb', 'ib'
 hos_conf = [
-    (4, "qt")
+    (1, "qt")
 ]  # (amount, host_type), host_type one of qt, gt, qemu, NOTE: do not mix qemu with other host types
 total_simbricks_hosts = reduce(lambda prev, cur: prev + cur[0], hos_conf, 0)
 
@@ -126,12 +132,7 @@ for i in range(1, num_ns3_hosts + 1):
     host.queue_size = f"{queue_size}B"
     app = e2e.E2EPacketSinkApplication("sink")
     app.local_ip = "0.0.0.0:5000"
-    app.stop_time = "20s"
     host.add_component(app)
-    probe = e2e.E2EPeriodicSampleProbe("probe", "Rx")
-    probe.interval = "100ms"
-    probe.file = f"sink-rx-{i}"
-    app.add_component(probe)
     topology.add_left_component(host)
 
 for i in range(1, num_ns3_hosts + 1):
@@ -142,17 +143,12 @@ for i in range(1, num_ns3_hosts + 1):
     host.queue_size = f"{queue_size}B"
     app = e2e.E2EBulkSendApplication("sender")
     app.remote_ip = f"192.168.64.{i}:5000"
-    app.stop_time = "20s"
     host.add_component(app)
     topology.add_right_component(host)
 
 # create the actual experiment instance
 e = exp.Experiment(
-    "-".join([h[1] for h in hos_conf])
-    + "-"
-    + nic_type
-    + "-Host-"
-    + f"{total_rate}m"
+    "-".join([h[1] for h in hos_conf]) + "-" + nic_type + "-Host-" + f"{total_rate}m"
 )
 e.add_network(net)
 
@@ -162,6 +158,7 @@ NicClass, NcClass = get_nic_class_and_node(nic_type)
 # create "proper" simulated servers and clients
 ip_start = num_ns3_hosts + 1
 servers = []
+server_index = 1
 for hos in hos_conf:
     for i in range(0, hos[0]):
         nic = NicClass()
@@ -171,21 +168,27 @@ for hos in hos_conf:
         node_config = NcClass()
         node_config.prefix = 24
         ip = ip_start + i
-        node_config.ip = f'10.0.{int(ip / 256)}.{ip % 256}'
+        node_config.ip = f"10.0.{int(ip / 256)}.{ip % 256}"
         node_config.app = node.NetperfServer()
 
         host_class = get_host_class(e, hos[1])
         server = host_class(node_config)
-        server.name = f's.{hos[1]}.{i}'
+        server.name = f"s.{hos[1]}.{i}"
 
         server.add_nic(nic)
         e.add_nic(nic)
         e.add_host(server)
 
         servers.append(server)
+
+        sn = f"server-{server_index}"
+        add_host_to_topo_left(topology, sn, nic, unsynchronized)
+        server_index += 1
+
     ip_start += hos[0]
 
 clients = []
+client_index = 1
 for hos in hos_conf:
     for i in range(0, hos[0]):
         nic = NicClass()
@@ -195,36 +198,24 @@ for hos in hos_conf:
         node_config = NcClass()
         node_config.prefix = 24
         ip = ip_start + i
-        node_config.ip = f'10.0.{int(ip / 256)}.{ip % 256}'
+        node_config.ip = f"10.0.{int(ip / 256)}.{ip % 256}"
         node_config.app = node.NetperfClient()
 
         host_class = get_host_class(e, hos[1])
         client = host_class(node_config)
-        client.name = f'c.{hos[1]}.{i}'
+        client.name = f"c.{hos[1]}.{i}"
 
         client.add_nic(nic)
         e.add_nic(nic)
         e.add_host(client)
 
         clients.append(client)
+
+        cn = f"client-{client_index}"
+        add_host_to_topo_right(topology, cn, nic, unsynchronized)
+        client_index += 1
+
     ip_start += hos[0]
-
-# make e2e-topo aware of other simulated hosts and nics
-for i, server in enumerate(servers, 1):
-    host = e2e.E2ESimbricksHost(f"server-{i}")
-    if unsynchronized:
-        host.sync = e2e.SimbricksSyncMode.SYNC_DISABLED
-    host.eth_latency = "1us"
-    host.simbricks_component = server.nics[0]
-    topology.add_left_component(host)
-
-for i, client in enumerate(clients, 1):
-    host = e2e.E2ESimbricksHost(f"client-{i}")
-    if unsynchronized:
-        host.sync = e2e.SimbricksSyncMode.SYNC_DISABLED
-    host.eth_latency = "1us"
-    host.simbricks_component = client.nics[0]
-    topology.add_right_component(host)
 
 # tell the clients netperf applications about the server ips they should send to
 i = 0
