@@ -34,66 +34,25 @@ import sys
 
 sys.path.insert(0, "/workspaces/simbricks-examples/utils")
 from visualize import experiment_graph_e2e_dumbbell
-from e2e_topo_helpers import add_host_to_topo_left, add_host_to_topo_right
-
-
-# helper method to create the HostClass
-def get_host_class(experiment, host_type):
-    HostClass = None
-    if host_type == "qemu":
-        HostClass = sim.QemuHost
-    elif host_type == "qt":
-
-        def qemu_timing(node_config: node.NodeConfig):
-            h = sim.QemuHost(node_config)
-            h.sync = True
-            return h
-
-        HostClass = qemu_timing
-    elif host_type == "gt":
-        HostClass = sim.Gem5Host
-        # e.checkpoint = True
-    else:
-        raise NameError(host_type)
-    return HostClass
-
-
-# helper method to create NicClass and NodeConfig
-# NOTE: the node is important as it provides drivers etc. needed to interface the NIC
-def get_nic_class_and_node(nic_type):
-    def corundum_linux_node():
-        nc = node.CorundumLinuxNode()
-        nc.memory = 2048
-        return nc
-
-    NicClass = None
-    NcClass = None
-    if nic_type == "ib":
-        NicClass = sim.I40eNIC
-        NcClass = node.I40eLinuxNode
-    elif nic_type == "cb":
-        NicClass = sim.CorundumBMNIC
-        NcClass = corundum_linux_node
-    elif nic_type == "cv":
-        NicClass = sim.CorundumVerilatorNIC
-        NcClass = corundum_linux_node
-    else:
-        raise NameError(nic_type)
-    return NicClass, NcClass
+from helpers import (
+    add_host_to_topo_left,
+    add_host_to_topo_right,
+    get_host_class,
+    get_nic_class_and_node,
+    init_ns3_net,
+    init_ns3_dumbbell_topo,
+)
 
 
 # parameters for eperiment
-mtu = 1500
-total_rate = 1000  # Mbps
 link_rate = 200  # in Mbps
 link_latency = 5  # in ms
 bdp = int(link_rate * link_latency / 1000 * 10**6)  # Bandwidth-delay product
 ip_start = "192.168.64.1"
 num_ns3_hosts = 0
-nic_type = "cv"  # one of: 'cv', 'cb', 'ib'
-hos_conf = [
-    (1, "qt")
-]  # (amount, host_type), host_type one of qt, gt, qemu, NOTE: do not mix qemu with other host types
+nic_type = "cv"  # one of: 'cv', 'cb'
+# (amount, host_type), host_type one of qt, gt, qemu,
+hos_conf = [(1, "qt"), (1, "gt")]
 total_simbricks_hosts = reduce(lambda prev, cur: prev + cur[0], hos_conf, 0)
 
 # sanity check and check sync
@@ -107,20 +66,12 @@ elif len(qemu_hosts) > 0:
 # create the actual experiment
 experiments = []
 
-queue_size = int(bdp * 2**1)
-options = {
-    "ns3::TcpSocket::SndBufSize": "524288",
-    "ns3::TcpSocket::RcvBufSize": "524288",
-}
 net = sim.NS3E2ENet()
-net.opt = " ".join([f"--{o[0]}={o[1]}" for o in options.items()])
+init_ns3_net(net)
 
 # create a dumbbell topology
 topology = E2EDumbbellTopology()
-topology.data_rate = f"{link_rate}Mbps"
-topology.delay = f"{link_latency}ms"
-topology.queue_size = f"{queue_size}B"
-topology.mtu = f"{mtu-52}"
+init_ns3_dumbbell_topo(topology, link_rate, link_latency)
 net.add_component(topology)
 
 # create ns3 applications to create background traffic -> mixed fidelity simulation
@@ -129,7 +80,7 @@ for i in range(1, num_ns3_hosts + 1):
     host.delay = "1us"
     host.data_rate = f"{link_rate}Mbps"
     host.ip = f"192.168.64.{i}/24"
-    host.queue_size = f"{queue_size}B"
+    host.queue_size = f"2000000B"
     app = e2e.E2EPacketSinkApplication("sink")
     app.local_ip = "0.0.0.0:5000"
     host.add_component(app)
@@ -140,16 +91,14 @@ for i in range(1, num_ns3_hosts + 1):
     host.delay = "1us"
     host.data_rate = f"{link_rate}Mbps"
     host.ip = f"192.168.64.{i+num_ns3_hosts+total_simbricks_hosts}/24"
-    host.queue_size = f"{queue_size}B"
+    host.queue_size = f"2000000B"
     app = e2e.E2EBulkSendApplication("sender")
     app.remote_ip = f"192.168.64.{i}:5000"
     host.add_component(app)
     topology.add_right_component(host)
 
 # create the actual experiment instance
-e = exp.Experiment(
-    "-".join([h[1] for h in hos_conf]) + "-" + nic_type + "-Host-" + f"{total_rate}m"
-)
+e = exp.Experiment("-".join([h[1] for h in hos_conf]) + "-" + nic_type + "-Host")
 e.add_network(net)
 
 # create nic class and node config to use
