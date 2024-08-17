@@ -34,6 +34,7 @@ e = exp.Experiment("qemu-Host")
 # create network
 # -----------------------------------------------------
 net = sim.SwitchNet()
+net.sync = False
 e.add_network(net)
 
 ######################################################
