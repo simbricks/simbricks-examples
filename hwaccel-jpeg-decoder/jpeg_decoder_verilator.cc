@@ -22,9 +22,9 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#define AXI_R_DEBUG 0
-#define AXI_W_DEBUG 0
-#define JPGD_DEBUG 0
+// #define AXI_R_DEBUG
+// #define AXI_W_DEBUG
+// #define JPGD_DEBUG
 
 #include "include/jpeg_decoder_verilator.hh"
 
@@ -67,7 +67,7 @@ uint64_t cur_ts = 0;
 VerilatorRegs verilator_regs{};
 
 void JpegDecAXISubordinateRead::do_read(const simbricks::AXIOperation &axi_op) {
-#if JPGD_DEBUG
+#ifdef JPGD_DEBUG
   std::cout << "JpegDecoderMemReader::doRead() ts=" << cur_ts
             << " id=" << axi_op.id << " addr=" << axi_op.addr
             << " len=" << axi_op.len << "\n";
@@ -95,7 +95,7 @@ void JpegDecAXISubordinateRead::do_read(const simbricks::AXIOperation &axi_op) {
 
 void JpegDecAXISubordinateWrite::do_write(
     const simbricks::AXIOperation &axi_op) {
-#if JPGD_DEBUG
+#ifdef JPGD_DEBUG
   std::cout << "JpegDecoderMemWriter::doWrite() ts=" << cur_ts
             << " id=" << axi_op.id << " addr=" << axi_op.addr
             << " len=" << axi_op.len << "\n";
@@ -122,7 +122,7 @@ void JpegDecAXISubordinateWrite::do_write(
 }
 
 void JpegDecAXILManager::read_done(simbricks::AXILOperationR &axi_op) {
-#if JPGD_DEBUG
+#ifdef JPGD_DEBUG
   std::cout << "JpegDecAXILManager::read_done() ts=" << cur_ts
             << " id=" << axi_op.req_id << " addr=" << axi_op.addr << "\n";
 #endif
@@ -140,7 +140,7 @@ void JpegDecAXILManager::read_done(simbricks::AXILOperationR &axi_op) {
 }
 
 void JpegDecAXILManager::write_done(simbricks::AXILOperationW &axi_op) {
-#if JPGD_DEBUG
+#ifdef JPGD_DEBUG
   std::cout << "JpegDecAXILManager::write_done ts=" << cur_ts
             << " id=" << axi_op.req_id << " addr=" << axi_op.addr << "\n";
 #endif
@@ -231,7 +231,7 @@ bool PciIfInit(const char *shm_path,
 
 bool h2d_read(volatile struct SimbricksProtoPcieH2DRead &read,
               uint64_t cur_ts) {
-#if JPGD_DEBUG
+#ifdef JPGD_DEBUG
   std::cout << "h2d_read ts=" << cur_ts << " bar=" << static_cast<int>(read.bar)
             << " offset=" << read.offset << " len=" << read.len << "\n";
 #endif
@@ -270,7 +270,7 @@ bool h2d_read(volatile struct SimbricksProtoPcieH2DRead &read,
 
 bool h2d_write(volatile struct SimbricksProtoPcieH2DWrite &write,
                uint64_t cur_ts, bool posted) {
-#if JPGD_DEBUG
+#ifdef JPGD_DEBUG
   std::cout << "h2d_write ts=" << cur_ts
             << " bar=" << static_cast<int>(write.bar)
             << " offset=" << write.offset << " len=" << write.len << "\n";
