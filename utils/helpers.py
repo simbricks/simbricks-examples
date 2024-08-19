@@ -70,18 +70,18 @@ def get_nic_class_and_node(nic_type):
     return NicClass, NcClass
 
 
-def add_host_to_topo_left(topo, host_name, nic, unsynchronized):
+def add_host_to_topo_left(topo, host_name, nic, synchronized):
     host = e2e.E2ESimbricksHost(host_name)
-    if unsynchronized:
+    if not synchronized:
         host.sync = e2e.SimbricksSyncMode.SYNC_DISABLED
     host.eth_latency = "1us"
     host.simbricks_component = nic
     topo.add_left_component(host)
 
 
-def add_host_to_topo_right(topo, host_name, nic, unsynchronized):
+def add_host_to_topo_right(topo, host_name, nic, synchronized):
     host = e2e.E2ESimbricksHost(host_name)
-    if unsynchronized:
+    if not synchronized:
         host.sync = e2e.SimbricksSyncMode.SYNC_DISABLED
     host.eth_latency = "1us"
     host.simbricks_component = nic
