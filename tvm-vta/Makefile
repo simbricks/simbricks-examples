@@ -4,7 +4,7 @@ IMAGE := output-tvm/tvm
 VTA_DIR := vta_src/simbricks
 VTA := $(VTA_DIR)/vta_simbricks
 
-all: run
+all: experiment_requirements
 
 %.raw: %
 	qemu-img convert -f qcow2 -O raw $< $@
@@ -29,3 +29,6 @@ clean:
 
 $(VTA):
 	SIMBRICKS_LIB=/simbricks/lib $(MAKE) -C $(VTA_DIR)
+
+.PHONY: experiment_requirements
+experiment_requirements: $(VTA) $(IMAGE)
