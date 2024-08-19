@@ -17,7 +17,7 @@ link_latency = 5  # in ms
 hos = "qemu"
 nic_class = sim.CorundumBMNIC
 node_class = helpers.corundum_linux_node
-unsynchronized = True
+synchronized = False
 
 ######################################################
 # create experiment
@@ -75,11 +75,11 @@ clients = create_basic_hosts(
 # -----------------------------------------------------
 for server_index, server in enumerate(servers, 1):
     sn = f"server-{server_index}"
-    helpers.add_host_to_topo_left(topology, sn, server.nics[0], unsynchronized)
+    helpers.add_host_to_topo_left(topology, sn, server.nics[0], synchronized)
 
 for client_index, client in enumerate(clients, 1):
     cn = f"client-{client_index}"
-    helpers.add_host_to_topo_right(topology, cn, client.nics[0], unsynchronized)
+    helpers.add_host_to_topo_right(topology, cn, client.nics[0], synchronized)
 
 ######################################################
 # tell client application about server IPs to use

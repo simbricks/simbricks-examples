@@ -17,7 +17,7 @@ link_latency = 5  # in ms
 hos = "qemu"
 nic_class = sim.CorundumBMNIC
 node_class = helpers.corundum_linux_node
-unsynchronized = True
+synchronized = False
 
 ######################################################
 # create experiment
@@ -29,7 +29,7 @@ e = exp.Experiment("qemu-Host")
 # create network
 # -----------------------------------------------------
 net = sim.SwitchNet()
-net.sync = False
+net.sync = synchronized
 e.add_network(net)
 
 ######################################################

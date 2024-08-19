@@ -19,7 +19,7 @@ bdp = int(link_rate * link_latency / 1000 * 10**6)  # Bandwidth-delay product
 hos_conf = [(1, "qt"), (1, "gt")]
 nic_class = sim.CorundumVerilatorNIC
 node_class = helpers.corundum_linux_node
-unsynchronized = False
+synchronized = True
 
 ######################################################
 # create experiment
@@ -83,11 +83,11 @@ for amount, sim_type in hos_conf:
 # -----------------------------------------------------
 for server_index, server in enumerate(servers, 1):
     sn = f"server-{server_index}"
-    helpers.add_host_to_topo_left(topology, sn, server.nics[0], unsynchronized)
+    helpers.add_host_to_topo_left(topology, sn, server.nics[0], synchronized)
 
 for client_index, client in enumerate(clients, 1):
     cn = f"client-{client_index}"
-    helpers.add_host_to_topo_right(topology, cn, client.nics[0], unsynchronized)
+    helpers.add_host_to_topo_right(topology, cn, client.nics[0], synchronized)
 
 ######################################################
 # tell client application about server IPs to use
