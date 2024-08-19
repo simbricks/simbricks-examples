@@ -12,7 +12,9 @@ all: experiment_requirements
 $(IMAGE): packer image/image.pkr.hcl image/install.sh image/cleanup.sh
 	rm -rf $(dir $@)
 	mkdir -p input-tvm
-	./packer build -var syscores=`nproc` image/image.pkr.hcl
+	./packer build -var="syscores=`nproc`" \
+		-var="http_proxy=$$http_proxy" -var="https_proxy=$$https_proxy" \
+		image/image.pkr.hcl
 	rm -rf input-tvm
 	touch $@
 
