@@ -5,6 +5,7 @@ import simbricks.orchestration.nodeconfig as node
 e = exp.Experiment('my-simple-experiment')
 
 net = sim.SwitchNet()
+net.sync = False
 e.add_network(net)
 
 server_config = node.I40eLinuxNode()
