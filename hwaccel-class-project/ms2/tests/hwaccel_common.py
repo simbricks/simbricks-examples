@@ -1,6 +1,7 @@
 import os
 import simbricks.orchestration.simulators as sim
 import simbricks.orchestration.nodeconfig as node
+from simbricks.orchestration.experiment.experiment_environment import ExpEnv
 
 
 # System configuration for the simulated machine. Configures commands to run
@@ -37,10 +38,10 @@ class MatMulApp(node.AppConfig):
         else:
           return [f'/tmp/guest/matmul-accel {self.n} {self.its}']
 
-    def config_files(self):
+    def config_files(self, env: ExpEnv):
         # copy binary into host image during prep
         m = {'matmul-accel': open('app/matmul-accel', 'rb')}
-        return {**m, **super().config_files()}
+        return {**m, **super().config_files(env)}
 
 
 # Simulator component for our accelerator model
