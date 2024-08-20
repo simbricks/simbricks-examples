@@ -15,7 +15,7 @@ import helpers
 link_rate = 200  # in Mbps
 link_latency = 5  # in ms
 hos = "qemu"
-nic_class = sim.CorundumBMNIC
+nic_class = sim.CorundumVerilatorNIC
 node_class = helpers.corundum_linux_node
 synchronized = False
 

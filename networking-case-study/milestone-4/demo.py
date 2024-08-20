@@ -15,7 +15,7 @@ import helpers
 link_rate = 200  # in Mbps
 link_latency = 5  # in ms
 # (amount, host_type), host_type one of qt, gt, qemu,
-hos_conf = [(1, "qt"), (1, "gt")]
+hos_conf = [(1, "qt"), (3, "gt")]
 nic_class = sim.CorundumVerilatorNIC
 node_class = helpers.corundum_linux_node
 num_ns3_hosts = 1
