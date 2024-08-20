@@ -6,6 +6,7 @@ sys.path.append(str(os.path.dirname(__file__)))
 import simbricks.orchestration.experiments as exp
 import simbricks.orchestration.simulators as sim
 import simbricks.orchestration.nodeconfig as node
+from simbricks.orchestration.experiment.experiment_environment import ExpEnv
 import exp_util
 import itertools
 import os
@@ -48,7 +49,7 @@ for host_var, inference_device, vta_clk_freq in itertools.product(
             self.debug = False
             """Whether to dump inference result."""
 
-        def config_files(self):
+        def config_files(self, env: ExpEnv):
             # mount TVM inference script in simulated server under /tmp/guest
             return {
                 "deploy_detection-infer.py": open(
