@@ -5,17 +5,17 @@
 import simbricks.orchestration.experiments as exp
 import simbricks.orchestration.simulators as sim
 import simbricks.orchestration.nodeconfig as node
-from simbricks.orchestration.experiment.experiment_environment import ExpEnv
+import simbricks.orchestration.experiment.experiment_environment as env
 
 class MatMulApp(node.AppConfig):
     def run_cmds(self, node):
         # application command to run once the host is booted up
         return ['m5 resetstats', '/tmp/guest/matrixmultiply', 'm5 dumpstats',]
 
-    def config_files(self, env: ExpEnv):
+    def config_files(self, environment: env.ExpEnv):
         # copy matrixmultiply binary into host image during prep
         m = {'matrixmultiply': open('app/matrixmultiply', 'rb')}
-        return {**m, **super().config_files(env)}
+        return {**m, **super().config_files(environment)}
 
 e = exp.Experiment(f'test1')
 e.checkpoint = True

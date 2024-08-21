@@ -3,7 +3,7 @@
 import simbricks.orchestration.experiments as exp
 import simbricks.orchestration.simulators as sim
 import simbricks.orchestration.nodeconfig as node
-from simbricks.orchestration.experiment.experiment_environment import ExpEnv
+import simbricks.orchestration.experiment.experiment_environment as env
 
 class MatMulApp(node.AppConfig):
     def __init__(self, n, block, it=None):
@@ -19,10 +19,10 @@ class MatMulApp(node.AppConfig):
           return [f'/tmp/guest/matrixmultiply_block {self.n} {self.block} '
                   f'{self.it}']
 
-    def config_files(self, env: ExpEnv):
+    def config_files(self, environment: env.ExpEnv):
         # copy matrixmultiply binary into host image during prep
         m = {'matrixmultiply_block': open('app/matrixmultiply_block', 'rb')}
-        return {**m, **super().config_files(env)}
+        return {**m, **super().config_files(environment)}
 
 e = exp.Experiment(f'test2')
 
