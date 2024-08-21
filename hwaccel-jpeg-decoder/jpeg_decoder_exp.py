@@ -30,7 +30,6 @@ import simbricks.orchestration.nodeconfig as node
 import simbricks.orchestration.simulators as sim
 import simbricks.orchestration.nodeconfig as node
 import simbricks.orchestration.experiment.experiment_environment as expenv
-from simbricks.orchestration.experiment.experiment_environment import ExpEnv
 
 
 class JpgDSim(sim.PCIDevSim):
@@ -118,7 +117,7 @@ class JpgDWorkload(node.AppConfig):
                 )
         return cmds
 
-    def config_files(self, env: ExpEnv) -> tp.Dict[str, tp.IO]:
+    def config_files(self, env: expenv.ExpEnv) -> tp.Dict[str, tp.IO]:
         files = {"pci_driver": open("pci_driver", "rb")}
         for img in self.images:
             files[os.path.basename(img)] = open(img, "rb")
