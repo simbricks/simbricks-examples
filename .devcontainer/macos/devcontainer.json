@@ -16,5 +16,7 @@
     }
   },
   "remoteUser": "simbricks",
-  "onCreateCommand": "sudo make -C /simbricks convert-images-raw"
+  "onCreateCommand": "sudo make -C /simbricks convert-images-raw",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/simbricks-examples,type=bind",
+  "workspaceFolder": "/workspaces/simbricks-examples"
 }

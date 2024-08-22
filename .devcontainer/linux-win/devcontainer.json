@@ -18,5 +18,7 @@
   },
   "remoteUser": "simbricks",
   "onCreateCommand": "sudo make -C /simbricks convert-images-raw",
-  "postStartCommand": "sudo chmod o+rw /dev/kvm "
+  "postStartCommand": "sudo chmod o+rw /dev/kvm ",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/simbricks-examples,type=bind",
+  "workspaceFolder": "/workspaces/simbricks-examples"
 }
