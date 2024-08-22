@@ -5,7 +5,10 @@ import simbricks.orchestration.simulators as sim
 from simbricks.orchestration.e2e_topologies import E2EDumbbellTopology
 from simbricks.orchestration.simulator_utils import create_basic_hosts
 import sys
-sys.path.insert(0, "/workspaces/simbricks-examples/utils")
+import pathlib
+
+workspace_path = pathlib.Path(__file__).parents[2]
+sys.path.insert(0, f"{workspace_path}/utils")
 import helpers
 
 ######################################################
