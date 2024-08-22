@@ -1,6 +1,8 @@
 import sys
+import pathlib
 
-sys.path.insert(0, "/workspaces/simbricks-examples/utils")
+workspace_path = pathlib.Path(__file__).parents[2]
+sys.path.insert(0, f"{workspace_path}/utils")
 from visualize import experiment_graph_e2e_dumbbell
 import demo
 
