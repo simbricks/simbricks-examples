@@ -1,124 +1,183 @@
-import simbricks.orchestration.e2e_components as e2e
-import simbricks.orchestration.experiments as exp
-import simbricks.orchestration.nodeconfig as node
-import simbricks.orchestration.simulators as sim
-from simbricks.orchestration.e2e_topologies import E2EDumbbellTopology
-from simbricks.orchestration.simulator_utils import create_basic_hosts
-import sys
-import pathlib
+# Copyright 2021 Max Planck Institute for Software Systems, and
+# National University of Singapore
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-workspace_path = pathlib.Path(__file__).parents[2]
-sys.path.insert(0, f"{workspace_path}/utils")
-import helpers
 
-######################################################
-# experiment parameters
-# -----------------------------------------------------
-link_rate = 200  # in Mbps
-link_latency = 5  # in ms
-# (amount, host_type), host_type one of qt, gt, qemu,
-hos_conf = [(1, "qt"), (3, "gt")]
-nic_class = sim.CorundumVerilatorNIC
-node_class = helpers.corundum_linux_node
-num_ns3_hosts = 1
+from simbricks.orchestration import system
+from simbricks.orchestration import simulation
+from simbricks.orchestration import instantiation
+from simbricks.utils import base as utils_base
+
+
+"""
+This list is used and expected
+"""
+instantiations = []
+
+
+"""
+PARAMETERS
+"""
+sys_nic = system.CorundumNIC
+sys_host = system.CorundumLinuxHost
+
+sim_nic = simulation.CorundumBMNICSim
+amount_qemu_sims = 1
+amount_gem_5_sims = 1
+
 synchronized = True
 
-######################################################
-# create experiment
-# -----------------------------------------------------
-experiments = []
-e = exp.Experiment("-".join([h[1] for h in hos_conf]) + "-Host")
+link_rate = 200  # in Mbps
+link_latency = 5  # in ms
 
-######################################################
-# create network
-# -----------------------------------------------------
-net = sim.NS3E2ENet()
-# create a dumbbell topology
-topology = E2EDumbbellTopology()
-helpers.init_ns3_dumbbell_topo(topology, link_rate, link_latency)
-net.add_component(topology)
-e.add_network(net)
+num_ns3_host_pairs = 1
 
-######################################################
-# create ns3 applications to create background traffic
-# -----------------------------------------------------
-for i in range(1, num_ns3_hosts + 1):
-    host = e2e.E2ESimpleNs3Host(f"ns3server-{i}")
-    host.ip = f"192.168.64.{i}/24"
-    app = e2e.E2EPacketSinkApplication("sink")
-    app.local_ip = "0.0.0.0:5000"
-    host.add_component(app)
-    topology.add_left_component(host)
 
-for i in range(1, num_ns3_hosts + 1):
-    host = e2e.E2ESimpleNs3Host(f"ns3client-{i}")
-    host.ip = f"192.168.64.{i+num_ns3_hosts}/24"
-    app = e2e.E2EBulkSendApplication("sender")
-    app.remote_ip = f"192.168.64.{i}:5000"
-    host.add_component(app)
-    topology.add_right_component(host)
+"""
+System Specification
+"""
+syst = system.System()
 
-######################################################
-# create server hosts and NICs
-# -----------------------------------------------------
-ip_start = num_ns3_hosts + 1
-servers = []
-for amount, sim_type in hos_conf:
-    servers.extend(
-        create_basic_hosts(
-            e,
-            amount,
-            f"ser-{sim_type}",
-            net,
-            nic_class,
-            helpers.get_host_class(e, sim_type),
-            node_class,
-            node.NetperfServer,
-            ip_start=ip_start,
-        )
+# create switch_1
+switch_1 = system.EthSwitch(syst)
+# create switch_2
+switch_2 = system.EthSwitch(syst)
+
+hosts = []
+nics = []
+for i in range(amount_gem_5_sims + amount_qemu_sims):
+    # create client
+    host0 = sys_host(syst)
+    host0.add_disk(system.DistroDiskImage(h=host0, name="base"))
+    host0.add_disk(system.LinuxConfigDiskImage(h=host0))
+    # create client NIC
+    nic0 = sys_nic(syst)
+    nic0.add_ipv4("10.0.0.1")
+    host0.connect_pcie_dev(nic0)
+
+    # connect client NIC to switch
+    switch_1.connect_eth_peer_if(nic0._eth_if)
+    
+    # create server
+    host1 = sys_host(syst)
+    host1.add_disk(system.DistroDiskImage(h=host1, name="base"))
+    host1.add_disk(system.LinuxConfigDiskImage(h=host1))
+    # create server NIC
+    nic1 = sys_nic(syst)
+    nic1.add_ipv4("10.0.0.2")
+    host1.connect_pcie_dev(nic1)
+
+    # connect server NIC to switch
+    switch_2.connect_eth_peer_if(nic1._eth_if)
+
+    # set client application
+    client_app = system.NetperfClient(h=host0, server_ip=nic1._ip)
+    client_app.wait = True
+    host0.add_app(client_app)
+    # set server application
+    server_app = system.NetperfServer(h=host1)
+    host1.add_app(server_app)
+
+    hosts.append(host0)
+    hosts.append(host1)
+
+    nics.append(nic0)
+    nics.append(nic1)
+
+ns3_hosts = []
+for i in range(num_ns3_host_pairs):
+    client = system.Host(syst)
+    client.parameters["ip"] = f"192.168.64.{i}/24"
+    client_inf = system.EthInterface(client)
+    client.add_if(client_inf)
+
+    switch_1.connect_eth_peer_if(client_inf)
+
+    server = system.Host(syst)
+    server.parameters["ip"] = f"192.168.64.{i + num_ns3_host_pairs}/24"
+    server_inf = system.EthInterface(server)
+    server.add_if(server_inf)
+
+    switch_2.connect_eth_peer_if(server_inf)
+
+    client_app = system.Application(client)
+    client_app.parameters["type_id"] = "ns3::BulkSendApplication"
+    client_app.parameters["ns3_params"] = {
+        'Remote(InetSocketAddress)': f"192.168.64.{i + num_ns3_host_pairs}:2000",
+    }
+    client.add_app(client_app)
+
+    server_app = system.Application(server)
+    server_app.parameters["type_id"] = "ns3::PacketSink"
+    server_app.parameters["ns3_params"] = {
+        'Local(InetSocketAddress)': "0.0.0.0:0",
+    }
+    server.add_app(server_app)
+
+    ns3_hosts.append(client)
+    ns3_hosts.append(server)
+
+# connect the two switches
+eth_1 = system.EthInterface(switch_1)
+switch_1.add_if(eth_1)
+eth_2 = system.EthInterface(switch_2)
+switch_2.add_if(eth_2)
+switch_to_switch_chan = system.EthChannel(eth_1, eth_2)
+# adjust channel options
+switch_to_switch_chan.set_latency(link_latency, utils_base.Time.Milliseconds)
+# NOTE: these are NS3 specific parameter
+switch_to_switch_chan.parameters = {"data_rate": f"{link_rate}Mbps"}
+
+
+"""
+Simulator Choice
+"""
+sim = simulation.Simulation(name="Milestone-4-simulation", system=syst)
+
+for index, host in enumerate(hosts, 1):
+    sim_class = (
+        simulation.Gem5Sim if index <= amount_gem_5_sims * 2 else simulation.QemuSim
     )
-    ip_start += amount
+    host_inst = sim_class(sim)
+    host_inst.add(host)
 
-######################################################
-# create client hosts and NICs
-# -----------------------------------------------------
-clients = []
-for amount, sim_type in hos_conf:
-    clients.extend(
-        create_basic_hosts(
-            e,
-            amount,
-            f"cli-{sim_type}",
-            net,
-            nic_class,
-            helpers.get_host_class(e, sim_type),
-            node_class,
-            node.NetperfClient,
-            ip_start=ip_start,
-        )
-    )
-    ip_start += amount
+for nic in nics:
+    nic_inst = sim_nic(simulation=sim)
+    nic_inst.add(nic)
 
-######################################################
-# tell network topology about attached NICs
-# -----------------------------------------------------
-for server_index, server in enumerate(servers, 1):
-    sn = f"server-{server_index}"
-    helpers.add_host_to_topo_left(topology, sn, server.nics[0], synchronized)
+net_inst = simulation.NS3Net(sim)
+net_inst.add(switch_1)
+net_inst.add(switch_2)
+for ns3_h in ns3_hosts:
+    net_inst.add(ns3_h)
 
-for client_index, client in enumerate(clients, 1):
-    cn = f"client-{client_index}"
-    helpers.add_host_to_topo_right(topology, cn, client.nics[0], synchronized)
+if synchronized:
+    sim.enable_synchronization(amount=500, ratio=utils_base.Time.Nanoseconds)
 
-######################################################
-# tell client application about server IPs to use
-# -----------------------------------------------------
-i = 0
-for cl in clients:
-    cl.node_config.app.server_ip = servers[i].node_config.ip
-    cl.wait = True
-    i += 1
 
-net.init_network()
+"""
+Instantiation
+"""
+instance = instantiation.Instantiation(sim)
+instantiations.append(instance)
 
-experiments.append(e)
+
+syst.toJSON()
