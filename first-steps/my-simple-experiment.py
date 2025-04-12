@@ -28,6 +28,7 @@ from simbricks.orchestration import simulation
 from simbricks.orchestration import instantiation
 from simbricks.utils import base as utils_base
 from simbricks.client.opus import base as opus_base
+from simbricks.orchestration.helpers import simulation as sim_helpers
 
 
 """
@@ -99,6 +100,18 @@ nic_inst1.add(nic1)
 net_inst = simulation.SwitchNet(sim)
 net_inst.add(switch)
 
+# ALternatively you can use a SimBricks helper function or define your own
+# in python to simplify things further:
+#
+# sim = sim_helpers.simple_simulation(
+#     syst,
+#     compmap={
+#         system.FullSystemHost: simulation.QemuSim,
+#         system.IntelI40eNIC: simulation.I40eNicSim,
+#         system.EthSwitch: simulation.SwitchNet,
+#     },
+# )
+
 # if synchronized set, enable synchronization for all SimBricks channels
 if synchronized:
     sim.enable_synchronization(amount=500, ratio=utils_base.Time.Nanoseconds)
@@ -108,6 +121,12 @@ if synchronized:
 Instantiation
 """
 instance = instantiation.Instantiation(sim)
+# Create a single runtime Fragement that is supposed to contain all simulators for execution.
+# In case you plan to distribute the execution of your virtual prototype across multiple machines, 
+# you would have to define multiple such Fragments. 
+fragment = instantiation.Fragment("SimbricksLocalRunner")
+fragment.add_simulators(*sim.all_simulators())
+instance.fragments = [fragment]
 instantiations.append(instance)
 
 
@@ -122,7 +141,7 @@ if __name__ == "__main__":
 
     # helper function to create and parse the experiment output
     async def iperf_throughput() -> None:
-        
+
         # Regex to match output lines from iperf client
         tp_pat = re.compile(
             r"\[ *\d*\] *([0-9\.]*)- *([0-9\.]*) sec.*Bytes *([0-9\.]*) ([GM])bits.*"
