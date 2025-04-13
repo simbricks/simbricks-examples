@@ -111,7 +111,7 @@ Instantiation
 """
 instance = instantiation.Instantiation(sim)
 
-fragment = instantiation.Fragment("SimbricksLocalRunner")
+fragment = instantiation.Fragment()
 fragment.add_simulators(*sim.all_simulators())
 instance.fragments = [fragment]
 

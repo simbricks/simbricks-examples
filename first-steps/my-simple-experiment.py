@@ -124,7 +124,7 @@ instance = instantiation.Instantiation(sim)
 # Create a single runtime Fragement that is supposed to contain all simulators for execution.
 # In case you plan to distribute the execution of your virtual prototype across multiple machines, 
 # you would have to define multiple such Fragments. 
-fragment = instantiation.Fragment("SimbricksLocalRunner")
+fragment = instantiation.Fragment()
 fragment.add_simulators(*sim.all_simulators())
 instance.fragments = [fragment]
 instantiations.append(instance)
