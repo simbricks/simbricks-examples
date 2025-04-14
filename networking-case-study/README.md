@@ -42,12 +42,16 @@ Adds less detailed host applications to generate background traffic. In mileston
 
 ![Milestone 4 Topology](images/network-case-study-4.svg)
 
+### Milestone 5: Distributed Execution
+We extend the Instantiation Configuration in the experiment script to create multiple execution Fragments. 
+One that executes the network (i.e. the red components in aboves schematic representation), one that executes one half of the hosts and NICs and another Fragment that executes the other half of hosts and NICs.
+
 ### Running the experiments
 The different milestone-experiments can be run by running the following command:
 ```bash
-simbricks-cli submit --follow milestone-<milestone-number>/demo.py
+simbricks-cli submit --follow milestone-<number>.py
 ```
 
-In case shown above replace `<milestone-number>` by the mielstone you're inetrested in, i.e. either 1,2,3 or 4.
+In case shown above replace `<number>` by the mielstone you're inetrested in, i.e. either 1,2,3 or 4.
 
 To learn more on how to execute SimBricks virtual prototypes reach out to us directly or check out our [documentation](https://simbricks.readthedocs.io/en/latest/).

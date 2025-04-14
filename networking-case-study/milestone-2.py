@@ -42,7 +42,7 @@ sys_host = system.CorundumLinuxHost
 sim_nic = simulation.CorundumBMNICSim
 sim_host = simulation.QemuSim
 
-synchronized = False
+synchronized = True
 
 link_rate = 200  # in Mbps
 link_latency = 5  # in ms

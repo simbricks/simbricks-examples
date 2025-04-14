@@ -37,7 +37,7 @@ After creating your SimBricks demo account, you’ll need to adjust the setup.sh
 
 Once you’ve updated the setup.py file, run the setup.sh script to set the necessary environment variables:
 ```
-source setup.sh
+source simbricks-client.env
 ```
 This step ensures your environment is correctly configured to interact with SimBricks.
 
