@@ -1,8 +1,5 @@
 {
-  "image": "simbricks/simbricks-examples",
-  "runArgs": [
-    "--platform=linux/amd64"
-  ],
+  "image": "mcr.microsoft.com/devcontainers/python:3.10",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -15,6 +12,5 @@
       ]
     }
   },
-  "remoteUser": "simbricks",
-  "onCreateCommand": "sudo make -C /simbricks convert-images-raw"
+  "onCreateCommand": "sudo pip install -r requirements.txt"
 }
