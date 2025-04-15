@@ -30,12 +30,12 @@ Once you have your SimBricks demo account, clone this repository and set up a Py
 
 ### Adjust the Setup Script and Set Up Environment Variables
 
-After creating your SimBricks demo account, you’ll need to adjust the setup.sh file located in the top-level directory of this repository:
-- Open the setup.py file.
+After creating your SimBricks demo account, you’ll need to adjust the simbricks-client.env file located in the top-level directory of this repository:
+- Open the simbricks-client.env file.
 - Locate the line that sets the NAMESPACE variable.
-- Replace <Your Demo email address> with the email address you used to create your demo account.
+- Replace <your demo email address> with the email address you used to create your demo account.
 
-Once you’ve updated the setup.py file, run the setup.sh script to set the necessary environment variables:
+Once you’ve updated the simbricks-client.env file, you need to source the simbricks-client.env file in order to set the necessary environment variables:
 ```
 source simbricks-client.env
 ```
