@@ -1,9 +1,0 @@
-.cache/
-obj_dir/
-out/
-__pycache__/
-
-compile_commands.json
-jpeg_decoder_verilator
-pci_driver
-*.vcd
