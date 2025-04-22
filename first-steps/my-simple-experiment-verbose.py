@@ -20,17 +20,26 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import re
+import asyncio
 
 from simbricks.orchestration import system
 from simbricks.orchestration import simulation
 from simbricks.orchestration import instantiation
-from simbricks.orchestration.helpers import simulation as sim_helpers
+from simbricks.utils import base as utils_base
+from simbricks.client.opus import base as opus_base
 
 
 """
 This list is used and expected
 """
 instantiations = []
+
+
+"""
+PARAMETERS
+"""
+synchronized = False
 
 
 """
@@ -73,14 +82,27 @@ switch.connect_eth_peer_if(nic1._eth_if)
 """
 Simulator Choice
 """
-sim = sim_helpers.simple_simulation(
-    syst,
-    compmap={
-        system.FullSystemHost: simulation.QemuSim,
-        system.IntelI40eNIC: simulation.I40eNicSim,
-        system.EthSwitch: simulation.SwitchNet,
-    },
-)
+sim = simulation.Simulation(name="My-simple-simulation", system=syst)
+
+host_inst0 = simulation.QemuSim(sim)
+host_inst0.add(host0)
+
+host_inst1 = simulation.QemuSim(sim)
+host_inst1.add(host1)
+
+nic_inst0 = simulation.I40eNicSim(simulation=sim)
+nic_inst0.add(nic0)
+
+nic_inst1 = simulation.I40eNicSim(simulation=sim)
+nic_inst1.add(nic1)
+
+net_inst = simulation.SwitchNet(sim)
+net_inst.add(switch)
+
+
+# if synchronized set, enable synchronization for all SimBricks channels
+if synchronized:
+    sim.enable_synchronization(amount=500, ratio=utils_base.Time.Nanoseconds)
 
 
 """
@@ -94,3 +116,37 @@ fragment = instantiation.Fragment()
 fragment.add_simulators(*sim.all_simulators())
 instance.fragments = [fragment]
 instantiations.append(instance)
+
+
+"""
+This is how you can use the SimBricks Api from python instead of the CLI. This 
+can e.g. be useful to immidiately parse an experiments output in python. 
+"""
+if __name__ == "__main__":
+
+    # create and send simulation run to the SimBricks backend
+    run_id = asyncio.run(opus_base.create_run(instance))
+
+    # helper function to create and parse the experiment output
+    async def iperf_throughput() -> None:
+
+        # Regex to match output lines from iperf client
+        tp_pat = re.compile(
+            r"\[ *\d*\] *([0-9\.]*)- *([0-9\.]*) sec.*Bytes *([0-9\.]*) ([GM])bits.*"
+        )
+        throughputs = []
+        # iterate through host output
+        line_gen = opus_base.ConsoleLineGenerator(run_id=run_id, follow=True)
+        async for _, line in line_gen.generate_lines():
+            m = tp_pat.match(line)
+            if not m:
+                continue
+            if m.group(4) == "G":
+                throughputs.append(float(m.group(3)) * 1000)
+            elif m.group(4) == "M":
+                throughputs.append(float(m.group(3)))
+
+        avg_throughput = sum(throughputs) / len(throughputs)
+        print(f"Iperf Throughput : {avg_throughput} Mbps")
+
+    asyncio.run(iperf_throughput())
