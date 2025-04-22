@@ -13,9 +13,24 @@ Welcome! To use the examples shown in this repository effectively, you’ll need
 
 The examples in this repository utilize the SimBricks cloud version. To run them as-is, you’ll need access to this backend. Start by [registering for a SimBricks demo account](https://www.simbricks.io/demo/). The registration ensures you have the proper credentials to interact with the backend.
 
+
+### Easy Start with Codespaces or with Devcontainer
+
+The easiest way to run examples here, is in [GitHub
+Codespaces]((https://codespaces.new/simbricks/simbricks-examples/?quickstart=1)
+or the pre-configured [devcontainer](https://containers.dev/) in the repo. For
+the former, just click on the link above and create a new codespace. For the
+latter, open the repo in an IDE with devcontainer support, such as
+[vscode](https://code.visualstudio.com/) and its [Dev Containers
+Extension](vscode:extension/ms-vscode-remote.remote-containers).
+
+** With devcontainers no additional setup is required and you can directly move
+on to [first steps](#first-steps).** For manual setup continue with the steps
+below.
+
 ### Clone This Repository and Set Up a Python Virtual Environment
 
-Once you have your SimBricks demo account, clone this repository and set up a Python virtual environment to manage dependencies. Here’s how you can do that:
+Once you have your SimBricks demo account, clone this repository and set up a Python virtual environment to manage dependencies:
 
 1. Clone the repository:
    ```
@@ -27,19 +42,6 @@ Once you have your SimBricks demo account, clone this repository and set up a Py
    python3 -m venv venv
    source venv/bin/activate
    ```
-
-### Adjust the Setup Script and Set Up Environment Variables
-
-After creating your SimBricks demo account, you’ll need to adjust the simbricks-client.env file located in the top-level directory of this repository:
-- Open the simbricks-client.env file.
-- Locate the line that sets the NAMESPACE variable.
-- Replace <your demo email address> with the email address you used to create your demo account.
-
-Once you’ve updated the simbricks-client.env file, you need to source the simbricks-client.env file in order to set the necessary environment variables:
-```
-source simbricks-client.env
-```
-This step ensures your environment is correctly configured to interact with SimBricks.
 
 ### Install Required SimBricks Python Packages
 
@@ -55,16 +57,22 @@ pip install -r requirements.txt
 
 With the above steps completed, you’re ready to dive into the examples provided in this repository.
 
-**If you encounter any issues, consult the SimBricks [documentation](https://simbricks.readthedocs.io/en/latest/) or reach out to us directly.** 
+**If you encounter any issues, consult the SimBricks [documentation](https://simbricks.readthedocs.io/en/latest/) or [reach out to us](https://www.simbricks.io/join-slack) directly.**
 
-<!-- The repository is set up with a [dev container](https://containers.dev/)
-configuration that makes running the examples a breeze. For quick tests you
-can just
-[open the repo in CodeSpaces](https://codespaces.new/simbricks/simbricks-examples).
-The easiest way to use this is with
-[vscode](https://code.visualstudio.com/) and its
-[Dev Containers Extension](vscode:extension/ms-vscode-remote.remote-containers)
-([details on setup](#environment-setup)) -->
+
+### Optional: Enable Shell Tab Completion
+
+You can make your life a bit easier by enabling tab-completion for the `simbricks-cli` command:
+```
+simbricks-cli --install-completion
+```
+
+Depending on your shell you may then have to reload completion settings or
+relaunch. For example for bash:
+```
+exec bash
+```
+
 
 ## First Steps
 Under [`first-steps/first_steps.ipynb`](first-steps/first_steps.ipynb) you will
