@@ -12,5 +12,5 @@
       ]
     }
   },
-  "onCreateCommand": "sudo pip install -r requirements.txt"
+  "onCreateCommand": "./.devcontainer/onCreate.sh"
 }
