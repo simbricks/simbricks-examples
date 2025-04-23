@@ -23,8 +23,8 @@
 
 from simbricks.orchestration import system
 from simbricks.orchestration import simulation
-from simbricks.orchestration import instantiation
 from simbricks.orchestration.helpers import simulation as sim_helpers
+from simbricks.orchestration.helpers import instantiation as inst_helpers
 
 
 """
@@ -86,11 +86,5 @@ sim = sim_helpers.simple_simulation(
 """
 Instantiation
 """
-instance = instantiation.Instantiation(sim)
-# Create a single runtime Fragement that is supposed to contain all simulators for execution.
-# In case you plan to distribute the execution of your virtual prototype across multiple machines,
-# you would have to define multiple such Fragments.
-fragment = instantiation.Fragment()
-fragment.add_simulators(*sim.all_simulators())
-instance.fragments = [fragment]
+instance = inst_helpers.simple_instantiation(sim)
 instantiations.append(instance)
