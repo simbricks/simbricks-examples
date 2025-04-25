@@ -1,0 +1,44 @@
+diff --git a/fpga/common/rtl/mqnic_rx_queue_map.v b/fpga/common/rtl/mqnic_rx_queue_map.v
+index ff9699d3..b7dba93c 100644
+--- a/fpga/common/rtl/mqnic_rx_queue_map.v
++++ b/fpga/common/rtl/mqnic_rx_queue_map.v
+@@ -256,7 +256,10 @@ always @(posedge clk) begin
+ 
+     indir_tbl_index_reg[INDIR_TBL_ADDR_WIDTH-1:0] <= (req_dest & app_mask_reg[req_id]) + (req_hash & hash_mask_reg[req_id]);
+     if (PORTS > 1) begin
+-        indir_tbl_index_reg[INDIR_TBL_ADDR_WIDTH +: CL_PORTS] <= req_id;
++        for (int i = 0; i < CL_PORTS; i++) begin
++            indir_tbl_index_reg[INDIR_TBL_ADDR_WIDTH + i] <= req_id[i];
++        end
++        // indir_tbl_index_reg[INDIR_TBL_ADDR_WIDTH +: CL_PORTS] <= req_id;
+     end
+     req_dest_d1_reg <= req_dest;
+     req_dest_d1_reg[DEST_WIDTH-1] <= req_dest[DEST_WIDTH-1] & app_direct_en_reg[req_id];
+diff --git a/fpga/lib/pcie/rtl/dma_if_axi_rd.v b/fpga/lib/pcie/rtl/dma_if_axi_rd.v
+index b80e5232..8a7ccabd 100644
+--- a/fpga/lib/pcie/rtl/dma_if_axi_rd.v
++++ b/fpga/lib/pcie/rtl/dma_if_axi_rd.v
+@@ -1014,7 +1014,8 @@ always @(posedge clk) begin
+         m_axi_rready_reg <= 1'b0;
+ 
+         s_axis_read_desc_ready_reg <= 1'b0;
+-        m_axis_read_desc_status_error_reg = 4'd0;
++        // m_axis_read_desc_status_error_reg = 4'd0;
++        m_axis_read_desc_status_error_reg <= 4'd0;
+         m_axis_read_desc_status_valid_reg <= 1'b0;
+ 
+         status_busy_reg <= 1'b0;
+diff --git a/modules/mqnic/mqnic_irq.c b/modules/mqnic/mqnic_irq.c
+index a78c30b6..5e939419 100644
+--- a/modules/mqnic/mqnic_irq.c
++++ b/modules/mqnic/mqnic_irq.c
+@@ -22,7 +22,8 @@ int mqnic_irq_init_pcie(struct mqnic_dev *mdev)
+ 	int k;
+ 
+ 	// Allocate MSI IRQs
+-	mdev->irq_count = pci_alloc_irq_vectors(pdev, 1, MQNIC_MAX_IRQ, PCI_IRQ_MSI | PCI_IRQ_MSIX);
++	// mdev->irq_count = pci_alloc_irq_vectors(pdev, 1, MQNIC_MAX_IRQ, PCI_IRQ_MSI | PCI_IRQ_MSIX);
++	mdev->irq_count = pci_alloc_irq_vectors(pdev, 1, MQNIC_MAX_IRQ, PCI_IRQ_MSI);
+ 	if (mdev->irq_count < 0) {
+ 		dev_err(dev, "Failed to allocate IRQs");
+ 		return -ENOMEM;
