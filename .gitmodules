@@ -1,0 +1,3 @@
+[submodule "corundum/corundum"]
+	path = corundum/corundum
+	url = git@github.com:corundum/corundum.git
