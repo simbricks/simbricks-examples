@@ -24,9 +24,10 @@ from __future__ import annotations
 
 import typing as tp
 from simbricks.utils import base as utils_base
-from simbricks.orchestration.system import base as sys_base
-from simbricks.orchestration.system import nic as sys_nic
-from simbricks.orchestration.system.host import base as sys_host
+from simbricks.orchestration import system as sys
+# from simbricks.orchestration.system import base as sys_base
+# from simbricks.orchestration.system import nic as sys_nic
+# from simbricks.orchestration.system.host import base as sys_host
 from simbricks.orchestration.simulation import base as sim_base
 from simbricks.orchestration.simulation import pcidev as sim_pcidev
 from simbricks.orchestration.instantiation import base as inst_base
@@ -35,12 +36,12 @@ from simbricks.orchestration.instantiation import base as inst_base
 # System Configuration Integration
 
 
-class CorundumNIC(sys_nic.SimplePCIeNIC):
-    def __init__(self, s: sys_base.System) -> None:
+class CorundumNIC(sys.SimplePCIeNIC):
+    def __init__(self, s: sys.System) -> None:
         super().__init__(s)
 
 
-class CorundumLinuxHost(sys_host.LinuxHost):
+class CorundumLinuxHost(sys.LinuxHost):
     def __init__(self, sys) -> None:
         super().__init__(sys)
         self.drivers.append("/tmp/guest/mqnic.ko")
@@ -63,7 +64,7 @@ class CorundumVerilatorNICSim(sim_pcidev.NICSim):
     def __init__(self, simulation: sim_base.Simulation):
         super().__init__(
             simulation=simulation,
-            executable="sims/nic/corundum/corundum_verilator",
+            executable="/corundum_src/adapter/corundum_simbricks_adapter",
         )
         self.name = f"CorundumVerilatorNICSim-{self._id}"
         self.clock_freq = 250  # MHz
