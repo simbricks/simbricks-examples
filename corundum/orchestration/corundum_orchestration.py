@@ -25,12 +25,10 @@ from __future__ import annotations
 import typing as tp
 from simbricks.utils import base as utils_base
 from simbricks.orchestration import system as sys
-# from simbricks.orchestration.system import base as sys_base
-# from simbricks.orchestration.system import nic as sys_nic
-# from simbricks.orchestration.system.host import base as sys_host
 from simbricks.orchestration.simulation import base as sim_base
 from simbricks.orchestration.simulation import pcidev as sim_pcidev
 from simbricks.orchestration.instantiation import base as inst_base
+from simbricks.orchestration.instantiation import socket as inst_socket
 
 
 # System Configuration Integration
@@ -49,7 +47,7 @@ class CorundumLinuxHost(sys.LinuxHost):
     def config_files(self, inst: inst_base.Instantiation) -> dict[str, tp.IO]:
         m = {
             "mqnic.ko": open(
-                f"{inst.env.repo_base(relative_path='/corundum_src/corundum/modules/mqnic/mqnic.ko')}",
+                "/corundum_src/corundum/modules/mqnic/mqnic.ko",
                 "rb",
             )
         }
@@ -74,8 +72,42 @@ class CorundumVerilatorNICSim(sim_pcidev.NICSim):
         return 512
 
     def run_cmd(self, inst: inst_base.Instantiation) -> str:
-        cmd = super().run_cmd(inst=inst)
-        cmd += f" {self.clock_freq}"
+        nic_devices = self.filter_components_by_type(ty=sys.SimplePCIeNIC)
+        nic_device = nic_devices[0]
+
+        channels = self.get_channels()
+
+        pci_channels = sim_base.Simulator.filter_channels_by_sys_type(
+            channels, sys.PCIeChannel
+        )
+        pci_latency, pci_sync_period, pci_run_sync = (
+            sim_base.Simulator.get_unique_latency_period_sync(pci_channels)
+        )
+        socket = inst.get_socket(interface=nic_device._pci_if)
+        pci_params_url = self.get_parameters_url(
+            inst,
+            socket,
+            sync=pci_run_sync,
+            latency=pci_latency,
+            sync_period=pci_sync_period,
+        )
+
+        eth_channels = sim_base.Simulator.filter_channels_by_sys_type(
+            channels, sys.EthChannel
+        )
+        eth_latency, eth_sync_period, eth_run_sync = (
+            sim_base.Simulator.get_unique_latency_period_sync(eth_channels)
+        )
+        socket = inst.get_socket(interface=nic_device._eth_if)
+        eth_params_url = self.get_parameters_url(
+            inst,
+            socket,
+            sync=eth_run_sync,
+            latency=eth_latency,
+            sync_period=eth_sync_period,
+        )
+
+        cmd = f"{self._executable} {pci_params_url} {eth_params_url} {self._start_tick} {self.clock_freq}"
         return cmd
 
     def toJSON(self) -> dict:
