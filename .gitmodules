@@ -1,0 +1,3 @@
+[submodule "tvm-vta/tvm-vta"]
+	path = tvm-vta/tvm-vta
+	url = git@github.com:simbricks/tvm-vta-simbricks.git
