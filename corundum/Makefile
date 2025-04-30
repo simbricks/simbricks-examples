@@ -39,9 +39,10 @@ kernel_dir := $(wildcard $(simbricks_base)/images/kernel/linux-*/)
 lib_dir := $(simbricks_base)/lib
 simbricks_lib_dir := $(lib_dir)/simbricks
 lib_nicif := $(simbricks_lib_dir)/nicif/libnicif.a
-lib_netif := $(simbricks_lib_dir)/netif/libnetif.a 
+lib_netif := $(simbricks_lib_dir)/network/libnetwork.a
 lib_pcie := $(simbricks_lib_dir)/pcie/libpcie.a 
 lib_base := $(simbricks_lib_dir)/base/libbase.a
+lib_parser := $(simbricks_lib_dir)/parser/libparser.a
 
 VERILATOR = verilator
 VFLAGS = -Wno-WIDTH -Wno-PINMISSING -Wno-LITENDIAN -Wno-IMPLICIT -Wno-SELRANGE \
@@ -52,7 +53,7 @@ TOPLEVEL = mqnic_core_axi
 
 $(verilator_src_corundum):
 	$(VERILATOR) $(VFLAGS) --cc -O3 \
-	    -CFLAGS "-I$(abspath $(lib_dir)) -O3 -g -Wall -Wno-maybe-uninitialized" \
+	    -CFLAGS "-I$(abspath $(lib_dir)) -iquote $(simbricks_base) -O3 -g -Wall -Wno-maybe-uninitialized" \
 	    --Mdir $(verilator_dir_corundum) \
 		--top-module $(verilog_interface_name) \
 		--trace \
@@ -65,7 +66,7 @@ $(verilator_src_corundum):
 	    -y $(dir_corundum)/fpga/lib/pcie/rtl \
 	    $(dir_corundum)/fpga/common/rtl/$(verilog_interface_name).v \
 	    $(dir_corundum)/fpga/common/rtl/mqnic_tx_scheduler_block_rr.v \
-		--exe $(abspath $(corundum_simbricks_adapter_src)) $(abspath $(lib_nicif) $(lib_netif) $(lib_pcie) $(lib_base))
+		--exe $(abspath $(corundum_simbricks_adapter_src)) $(abspath $(lib_nicif) $(lib_netif) $(lib_pcie) $(lib_base) $(lib_parser))
 
 $(verilator_bin_corundum): $(verilator_src_corundum) $(corundum_simbricks_adapter_src)
 	$(MAKE) -C $(verilator_dir_corundum) -f $(verilator_interface_name).mk
