@@ -47,10 +47,13 @@ System Specification
 """
 syst = system.System()
 
+# create disk images
+distro_disk_image = system.DistroDiskImage(syst, "base")
+
 # create client
 host0 = system.I40ELinuxHost(syst)
-host0.add_disk(system.DistroDiskImage(h=host0, name="base"))
-host0.add_disk(system.LinuxConfigDiskImage(h=host0))
+host0.add_disk(distro_disk_image)
+host0.add_disk(system.LinuxConfigDiskImage(syst, host0))
 # create client NIC
 nic0 = system.IntelI40eNIC(syst)
 nic0.add_ipv4("10.0.0.1")
@@ -58,8 +61,8 @@ host0.connect_pcie_dev(nic0)
 
 # create server
 host1 = system.I40ELinuxHost(syst)
-host1.add_disk(system.DistroDiskImage(h=host1, name="base"))
-host1.add_disk(system.LinuxConfigDiskImage(h=host1))
+host1.add_disk(distro_disk_image)
+host1.add_disk(system.LinuxConfigDiskImage(syst, host1))
 # create server NIC
 nic1 = system.IntelI40eNIC(syst)
 nic1.add_ipv4("10.0.0.2")
