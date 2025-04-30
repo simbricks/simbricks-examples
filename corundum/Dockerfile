@@ -29,7 +29,7 @@ USER root
 
 COPY . /corundum_src
 
-ENV PYTHONPATH="/corundum_src/orchestration"
+ENV PYTHONPATH="/corundum_src"
 
 WORKDIR /corundum_src
 
@@ -51,6 +51,6 @@ RUN cd /tmp \
     && patch -p1 < /corundum_src/corundum-verilog.patch \
     && cd /corundum_src \
     && pip install --no-cache-dir --force-reinstall -r requirements.txt \
-    && make all
+    && make -j `nproc` all
 
 USER simbricks
