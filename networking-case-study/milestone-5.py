@@ -56,6 +56,9 @@ System Specification
 """
 syst = system.System()
 
+# create disk images
+distro_disk_image = system.DistroDiskImage(syst, "base")
+
 # create switch_1
 switch_1 = system.EthSwitch(syst)
 # create switch_2
@@ -66,8 +69,8 @@ nics = []
 for i in range(amount_gem_5_sims + amount_qemu_sims):
     # create client
     host0 = sys_host(syst)
-    host0.add_disk(system.DistroDiskImage(h=host0, name="base"))
-    host0.add_disk(system.LinuxConfigDiskImage(h=host0))
+    host0.add_disk(distro_disk_image)
+    host0.add_disk(system.LinuxConfigDiskImage(syst, host0))
     # create client NIC
     nic0 = sys_nic(syst)
     nic0.add_ipv4("10.0.0.1")
@@ -78,8 +81,8 @@ for i in range(amount_gem_5_sims + amount_qemu_sims):
     
     # create server
     host1 = sys_host(syst)
-    host1.add_disk(system.DistroDiskImage(h=host1, name="base"))
-    host1.add_disk(system.LinuxConfigDiskImage(h=host1))
+    host1.add_disk(distro_disk_image)
+    host1.add_disk(system.LinuxConfigDiskImage(syst, host1))
     # create server NIC
     nic1 = sys_nic(syst)
     nic1.add_ipv4("10.0.0.2")
@@ -150,7 +153,7 @@ switch_to_switch_chan.parameters = {"data_rate": f"{link_rate}Mbps"}
 """
 Simulator Choice
 """
-sim = simulation.Simulation(name="Milestone-4-simulation", system=syst)
+sim = simulation.Simulation(name="Milestone-5-simulation", system=syst)
 
 for index, host in enumerate(hosts, 1):
     sim_class = (
