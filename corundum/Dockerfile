@@ -23,19 +23,14 @@
 ARG REGISTRY=
 ARG TAG=:latest
 
-FROM ${REGISTRY}simbricks/simbricks-fullsims${TAG} AS corelib
+FROM ${REGISTRY}simbricks/simbricks-executor${TAG}
 
 USER root
 
-COPY . /corundum_src
-
-ENV PYTHONPATH="/corundum_src"
-
-WORKDIR /corundum_src
-
+# install newer verilator version in order to later on verilate corundum
 RUN cd /tmp \
-    && sudo apt-get update \
-    && sudo apt-get install help2man \
+    && apt-get update \
+    && apt-get install help2man \
     && git clone -b v5.032 https://github.com/verilator/verilator \
     && cd verilator \
     && autoupdate \
@@ -43,14 +38,30 @@ RUN cd /tmp \
     && ./configure \
     && make -j`nproc` \
     && make install \
-    && rm -rf /tmp/verilator \
-    && cd /simbricks \
-    && patch -p1 < /corundum_src/kernel-config.patch \
-    && make -j `nproc` build-images-min COMPRESSED_IMAGES=true \
-    && cd /corundum_src/corundum \
-    && patch -p1 < /corundum_src/corundum-verilog.patch \
-    && cd /corundum_src \
-    && pip install --no-cache-dir --force-reinstall -r requirements.txt \
-    && make -j `nproc` all
+    && rm -rf /tmp/verilator
+    # \
+    # && pip install --no-cache-dir --force-reinstall -r requirements.txt \
 
 USER simbricks
+
+COPY --chown=simbricks . /corundum_src
+ENV PYTHONPATH="/corundum_src"
+
+# Build linux image that can be used with corundum
+RUN <<EOF
+cd /simbricks 
+patch -p1 < /corundum_src/kernel-config.patch
+make -j `nproc` build-images-min COMPRESSED_IMAGES=true
+
+# Build corundum driver and adapter
+cd /corundum_src/corundum
+patch -p1 < /corundum_src/corundum-verilog.patch
+cd /corundum_src
+make -j `nproc` all
+
+# cleanup images to reduce image size
+cd /simbricks
+bash docker/cleanup_images.sh
+EOF
+
+WORKDIR /simbricks
