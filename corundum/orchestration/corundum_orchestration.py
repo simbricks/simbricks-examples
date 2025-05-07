@@ -28,7 +28,6 @@ from simbricks.orchestration import system as sys
 from simbricks.orchestration.simulation import base as sim_base
 from simbricks.orchestration.simulation import pcidev as sim_pcidev
 from simbricks.orchestration.instantiation import base as inst_base
-from simbricks.orchestration.instantiation import socket as inst_socket
 
 
 # System Configuration Integration
@@ -49,7 +48,11 @@ class CorundumLinuxHost(sys.LinuxHost):
             "mqnic.ko": open(
                 "/corundum_src/corundum/modules/mqnic/mqnic.ko",
                 "rb",
-            )
+            ),
+            "mqnic-dump": open(
+                "/corundum_src/corundum/utils/mqnic-dump",
+                "rb",
+            ),
         }
         return {**m, **super().config_files(inst=inst)}
 
