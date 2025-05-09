@@ -50,24 +50,36 @@ distro_disk_image = system.DistroDiskImage(syst, "base")
 
 # create client
 host0 = co.CorundumLinuxHost(syst)
+host0.name = "client-Host"
 host0.add_disk(distro_disk_image)
 host0.add_disk(system.LinuxConfigDiskImage(syst, host0))
 # create client NIC
 nic0 = co.CorundumNIC(syst)
+nic0.name = "client-NIC"
 nic0.add_ipv4("10.0.0.1")
 host0.connect_pcie_dev(nic0)
 
 # create server
 host1 = co.CorundumLinuxHost(syst)
+host1.name = "server-Host"
 host1.add_disk(distro_disk_image)
 host1.add_disk(system.LinuxConfigDiskImage(syst, host1))
 # create server NIC
 nic1 = co.CorundumNIC(syst)
+nic1.name = "server-NIC"
 nic1.add_ipv4("10.0.0.2")
 host1.connect_pcie_dev(nic1)
 
 # set client application
-client_app = system.PingClient(host0, nic1._ip)
+client_app = system.GenericRawCommandApplication(
+    host0,
+    [
+        "mount proc /proc -t proc",
+        "mount -t sysfs sysfs /sys",
+        f"ping -c 20 {nic1._ip}",
+        "rmmod -v mqnic",
+    ],
+)
 client_app.wait = True
 host0.add_app(client_app)
 # set server application
@@ -97,4 +109,9 @@ sim = sim_helpers.simple_simulation(
 Instantiation
 """
 instance = inst_helpers.simple_instantiation(sim)
+# Here we ensure that the runner does choose a proper docker image (the image defined in this repository)
+# for executing the fragment we created.
+fragment = instance.fragments[0]
+fragment._fragment_executor_tag = "corundum_executor"
+
 instantiations.append(instance)
