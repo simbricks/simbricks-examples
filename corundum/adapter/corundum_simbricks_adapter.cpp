@@ -89,6 +89,9 @@ void reset_corundum(Vmqnic_core_axi &top_verilator_interface)
   top_verilator_interface.m_axis_tx_tkeep = 0;
   top_verilator_interface.m_axis_tx_tlast = 0;
   top_verilator_interface.m_axis_tx_tuser = 0;
+  top_verilator_interface.s_axis_tx_cpl_valid = 0;
+  top_verilator_interface.s_axis_tx_cpl_tag = 0;
+  // top_verilator_interface.s_axis_tx_cpl_ts = 0;
 
   top_verilator_interface.m_axi_araddr = 0;
   top_verilator_interface.m_axi_arid = 0;
@@ -595,10 +598,12 @@ void poll_n2d(struct SimbricksNicIf &nicif, uint64_t cur_ts,
 }
 
 void packet_d2n(struct SimbricksNicIf &nicif, uint64_t cur_ts,
-                AxiSToNetworkT &axis_to_network)
+                AxiSToNetworkT &axis_to_network,
+                Vmqnic_core_axi &top_verilator_interface)
 {
   if (not axis_to_network.is_packet_done())
   {
+    top_verilator_interface.s_axis_tx_cpl_valid = 0;
     // if no packet is done we have nothing to do
     return;
   }
@@ -618,13 +623,18 @@ void packet_d2n(struct SimbricksNicIf &nicif, uint64_t cur_ts,
 
   volatile struct SimbricksProtoNetMsgPacket *packet = &msg->packet;
   size_t packet_len = 0;
-  axis_to_network.write(const_cast<uint8_t *>(packet->data), &packet_len);
+  uint8_t user;
+  axis_to_network.write(const_cast<uint8_t *>(packet->data), &packet_len, user);
   if (packet_len > UINT16_MAX)
   {
     sim_log::LogError("corundum packet_d2n packet len too large\n");
     std::terminate();
   }
   packet->len = static_cast<uint16_t>(packet_len);
+
+  // send courundum completion
+  top_verilator_interface.s_axis_tx_cpl_valid = 1;
+  top_verilator_interface.s_axis_tx_cpl_tag = (user >> 1);
 
 #ifdef CORUNDUM_VERILATOR_DEBUG
   sim_log::LogInfo(
@@ -900,7 +910,7 @@ int main(int argc, char *argv[])
     mmio.step(main_time);
     axis_from_network.step();
     axis_to_network.step();
-    packet_d2n(nicif, main_time, axis_to_network);
+    packet_d2n(nicif, main_time, axis_to_network, *top_verilator_interface);
     msi_intr_handler.step(main_time);
     top_verilator_interface->eval();
 
