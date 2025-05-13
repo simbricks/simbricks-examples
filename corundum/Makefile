@@ -77,7 +77,6 @@ $(corundum_simbricks_adapter_bin): $(verilator_bin_corundum)
 adapter: $(corundum_simbricks_adapter_bin)
 
 driver:
-	@echo $(kernel_dir)
 	$(MAKE) -C $(kernel_dir) M=$(abspath $(mqnic_dir)) modules
 	$(MAKE) -C $(dir_corundum)/utils
 

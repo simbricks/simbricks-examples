@@ -23,6 +23,7 @@
 from __future__ import annotations
 
 import typing as tp
+import typing_extensions as tpe
 from simbricks.utils import base as utils_base
 from simbricks.orchestration import system as sys
 from simbricks.orchestration.simulation import base as sim_base
@@ -121,7 +122,7 @@ class CorundumVerilatorNICSim(sim_pcidev.NICSim):
     @classmethod
     def fromJSON(
         cls, simulation: sim_base.Simulation, json_obj: dict
-    ) -> CorundumVerilatorNICSim:
+    ) -> tpe.Self:
         instance = super().fromJSON(simulation, json_obj)
         instance.clock_freq = utils_base.get_json_attr_top(json_obj, "clock_freq")
         return instance

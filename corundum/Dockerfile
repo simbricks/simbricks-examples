@@ -39,8 +39,6 @@ RUN cd /tmp \
     && make -j`nproc` \
     && make install \
     && rm -rf /tmp/verilator
-    # \
-    # && pip install --no-cache-dir --force-reinstall -r requirements.txt \
 
 USER simbricks
 
@@ -49,9 +47,9 @@ ENV PYTHONPATH="/corundum_src"
 
 # Build linux image that can be used with corundum
 RUN <<EOF
-cd /simbricks 
-patch -p1 < /corundum_src/kernel-config.patch
-make -j `nproc` build-images-min COMPRESSED_IMAGES=true
+# Download the kernel that is used by the base image in order to build the corundum driver
+cd /simbricks
+make prep-mods
 
 # Build corundum driver and adapter
 cd /corundum_src/corundum
@@ -61,7 +59,7 @@ make -j `nproc` all
 
 # cleanup images to reduce image size
 cd /simbricks
-bash docker/cleanup_images.sh
+# bash docker/cleanup_images.sh
 EOF
 
 WORKDIR /simbricks
