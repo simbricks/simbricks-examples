@@ -76,6 +76,7 @@ client_app = system.GenericRawCommandApplication(
     [
         "mount proc /proc -t proc",
         "mount -t sysfs sysfs /sys",
+        "sleep 2",
         f"ping -c 20 {nic1._ip}",
         "rmmod -v mqnic",
     ],
