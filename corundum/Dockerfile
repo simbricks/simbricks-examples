@@ -57,9 +57,6 @@ patch -p1 < /corundum_src/corundum-verilog.patch
 cd /corundum_src
 make -j `nproc` all
 
-# cleanup images to reduce image size
-cd /simbricks
-# bash docker/cleanup_images.sh
 EOF
 
 WORKDIR /simbricks
