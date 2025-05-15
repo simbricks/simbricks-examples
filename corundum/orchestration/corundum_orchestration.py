@@ -76,7 +76,7 @@ class CorundumVerilatorNICSim(sim_pcidev.NICSim):
         return 512
 
     def run_cmd(self, inst: inst_base.Instantiation) -> str:
-        nic_devices = self.filter_components_by_type(ty=sys.SimplePCIeNIC)
+        nic_devices = self.filter_components_by_type(ty=CorundumNIC)
         nic_device = nic_devices[0]
 
         channels = self.get_channels()
