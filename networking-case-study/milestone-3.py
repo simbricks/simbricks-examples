@@ -36,10 +36,10 @@ instantiations = []
 """
 PARAMETERS
 """
-sys_nic = system.CorundumNIC
-sys_host = system.CorundumLinuxHost
+sys_nic = system.IntelI40eNIC
+sys_host = system.I40ELinuxHost
 
-sim_nic = simulation.CorundumBMNICSim
+sim_nic = simulation.I40eNicSim
 amount_qemu_sims = 1
 amount_gem_5_sims = 1
 
@@ -73,7 +73,7 @@ for i in range(amount_gem_5_sims + amount_qemu_sims):
     nic0 = sys_nic(syst)
     nic0.add_ipv4("10.0.0.1")
     host0.connect_pcie_dev(nic0)
-    
+
     # connect client NIC to switch
     switch_1.connect_eth_peer_if(nic0._eth_if)
 
@@ -85,7 +85,7 @@ for i in range(amount_gem_5_sims + amount_qemu_sims):
     nic1 = sys_nic(syst)
     nic1.add_ipv4("10.0.0.2")
     host1.connect_pcie_dev(nic1)
-    
+
     # connect server NIC to switch
     switch_2.connect_eth_peer_if(nic1._eth_if)
 

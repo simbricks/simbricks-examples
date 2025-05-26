@@ -36,10 +36,10 @@ instantiations = []
 """
 PARAMETERS
 """
-sys_nic = system.CorundumNIC
-sys_host = system.CorundumLinuxHost
+sys_nic = system.IntelI40eNIC
+sys_host = system.I40ELinuxHost
 
-sim_nic = simulation.CorundumBMNICSim
+sim_nic = simulation.I40eNicSim
 sim_host = simulation.QemuSim
 
 synchronized = True
