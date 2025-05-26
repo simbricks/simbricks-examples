@@ -7,15 +7,10 @@ This Simbricks example demonstrates how to leverage the orchestration framework 
 2. **Dumbbell Topology:** Introduces a more complex topology replacing the switch.
 3. **Multiple Client-Server Pairs:** Demonstrates handling different client-server types.
 4. **Background Traffic:** Simulates realistic network conditions with less detailed host applications.
+5. **Distributed Execution:** Showcases how SimBricks Instantiation can be used to create multiple execution fragments for a Virtual Prototype.
 
 During these milestones building upon the experiment script from milestone 1, additional complexity is added to the experiment throughout all following milestones by making slight changes to the python definition of the experiment, thus showing how the SimBricks orchestration framework can be used effectively.
 
-### Corundum NIC
-
-We use the [Corundum open-source NIC](https://github.com/corundum/corundum) across all milestones. During the first milestone we utilize a [behavioral C++ model](https://github.com/simbricks/simbricks/tree/main/sims/nic/corundum_bm) of the Corundum NIC that is provided by SimBricks. In the milestones 2,3, and 4 we then switch to the RTL simulation using Verilator. In Order to do so, SimBricks provides an [Adapter and Wrapper](https://github.com/simbricks/simbricks/blob/main/sims/nic/corundum/corundum_verilator.cc) around Verilator.
-The Simbricks orchestration framework facilitates seamless transitions between the behavioral model and the unmodified FPGA RTL simulated using Verilator. For that purpose, SimBricks provides python classes in its orchestraition framework that are wrap the [behavioral model](https://github.com/simbricks/simbricks/blob/0373937031dc5adba6a65860649035e80939f38a/experiments/simbricks/orchestration/simulators.py#L753C1-L756C67) and the [RTL model](https://github.com/simbricks/simbricks/blob/0373937031dc5adba6a65860649035e80939f38a/experiments/simbricks/orchestration/simulators.py#L737C1-L750C10).
-
-To use the NIC alongside hosts that run unmodified Linux, we provide the [cordundum Linux driver](https://github.com/simbricks/simbricks/tree/main/images/mqnic) and provide it as kernel modul to Linux when simulating a host. For that purpose the SimBricks orchestraition framework provides a [`NodeConfig`](https://github.com/simbricks/simbricks/blob/0373937031dc5adba6a65860649035e80939f38a/experiments/simbricks/orchestration/nodeconfig.py#L223C1-L232C50) that allows a host simulator to mount the required kernel module and load it on startup.
 
 ### Milestone 1: Single Client-Server Pair with Switch
 A simple topology consisting of a client, server, and a switch. This milestone serves as a starting point for the upcoming milestones. In this initial experiment setup, we will see how the SimBricks orchestration framework can be used to create a very simple experiment:
