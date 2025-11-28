@@ -31,6 +31,9 @@ adapter_main := adapter/corundum_simbricks_adapter
 corundum_simbricks_adapter_src := $(adapter_main).cpp
 corundum_simbricks_adapter_bin := $(adapter_main)
 
+dir_corundum_bm := ./corundum_behavioral_model
+corundum_bm_bin := $(dir_corundum_bm)/corundum_bm
+
 simbricks_base := /simbricks
 
 mqnic_dir := $(dir_corundum)/modules/mqnic
@@ -43,6 +46,7 @@ lib_netif := $(simbricks_lib_dir)/network/libnetwork.a
 lib_pcie := $(simbricks_lib_dir)/pcie/libpcie.a 
 lib_base := $(simbricks_lib_dir)/base/libbase.a
 lib_parser := $(simbricks_lib_dir)/parser/libparser.a
+lib_nicbm := $(simbricks_lib_dir)/nicbm/libnicbm.a
 
 VERILATOR = verilator
 VFLAGS = -Wno-WIDTH -Wno-PINMISSING -Wno-LITENDIAN -Wno-IMPLICIT -Wno-SELRANGE \
@@ -80,10 +84,15 @@ driver:
 	$(MAKE) -C $(kernel_dir) M=$(abspath $(mqnic_dir)) modules
 	$(MAKE) -C $(dir_corundum)/utils
 
-all: driver adapter
+$(corundum_bm_bin): $(dir_corundum_bm)/corundum_bm.cpp $(dir_corundum_bm)/corundum_bm.hpp
+	$(CXX) -Wall -O2 -I$(abspath $(lib_dir)) -iquote $(simbricks_base) -o $@ $(dir_corundum_bm)/corundum_bm.cpp $(lib_nicbm) $(lib_nicif) $(lib_base) $(lib_pcie) $(lib_netif)
+
+corundum_bm: $(corundum_bm_bin)
+
+all: driver adapter corundum_bm
 .DEFAULT_GOAL := all
 
 clean: 
-	rm -rf $(corundum_simbricks_adapter_bin) $(verilator_dir_corundum) $(OBJS) ready
+	rm -rf $(corundum_bm_bin) $(corundum_simbricks_adapter_bin) $(verilator_dir_corundum) $(OBJS) ready
 
-.PHONY: all driver adapter clean
+.PHONY: all driver adapter clean corundum_bm
