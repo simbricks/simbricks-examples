@@ -100,7 +100,7 @@ sim = sim_helpers.simple_simulation(
     syst,
     compmap={
         system.FullSystemHost: simulation.QemuSim,
-        co.CorundumNIC: co.CorundumVerilatorNICSim,
+        co.CorundumNIC: co.CorundumBMNICSim,
         system.EthSwitch: simulation.SwitchNet,
     },
 )
