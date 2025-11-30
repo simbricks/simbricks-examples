@@ -74,12 +74,10 @@ host1.connect_pcie_dev(nic1)
 client_app = system.GenericRawCommandApplication(
     host0,
     [
-        # "sleep 12",
         "mount proc /proc -t proc",
         "mount -t sysfs sysfs /sys",
         "sleep 2",
         f"ping -c 20 {nic1._ip}",
-        # "sleep 12",
         "rmmod -v mqnic",
     ],
 )
@@ -102,21 +100,10 @@ sim = sim_helpers.simple_simulation(
     syst,
     compmap={
         system.FullSystemHost: simulation.QemuSim,
-        # system.FullSystemHost: simulation.Gem5Sim,
-        # co.CorundumNIC: co.CorundumVerilatorNICSim,
-        # co.CorundumNIC: co.CorundumBMNICSim,
+        co.CorundumNIC: co.CorundumVerilatorNICSim,
         system.EthSwitch: simulation.SwitchNet,
     },
 )
-
-nic_inst0 = co.CorundumVerilatorNICSim(simulation=sim)
-nic_inst0.add(nic0)
-nic_inst0.name = nic0.name
-
-nic_inst1 = co.CorundumVerilatorNICSim(simulation=sim)
-nic_inst1.add(nic1)
-nic_inst1.name = nic1.name
-
 
 """
 Instantiation
@@ -125,7 +112,7 @@ instance = inst_helpers.simple_instantiation(sim)
 # Here we ensure that the runner does choose a proper docker image (the image defined in this repository)
 # for executing the fragment we created.
 fragment = instance.fragments[0]
-fragment._fragment_executor_tag = "corundum_legacy_executor"
+fragment._fragment_executor_tag = "corundum_legacy"
 
 instantiations.append(instance)
 

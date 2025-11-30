@@ -47,8 +47,7 @@ class CorundumLinuxHost(sys.LinuxHost):
     def config_files(self, inst: inst_base.Instantiation) -> dict[str, tp.IO]:
         m = {
             "mqnic.ko": open(
-                # "/corundum_src/corundum/modules/mqnic/mqnic.ko",
-                "/workspaces/simbricks-examples-tmp/corundum_legacy/mqnic_driver/mqnic.ko",
+                "/corundum_src/mqnic_driver/mqnic.ko",
                 "rb",
             ),
         }
@@ -63,7 +62,7 @@ class CorundumBMNICSim(sim_pcidev.NICSim):
     def __init__(self, simulation: sim_base.Simulation):
         super().__init__(
             simulation=simulation,
-            executable="../workspaces/simbricks-examples-tmp/corundum_legacy/behavioral_model/corundum_bm",
+            executable="../corundum_src/behavioral_model/corundum_bm",
         )
         self.name = f"CorundumBMNICSim-{self._id}"
 
@@ -94,12 +93,10 @@ class CorundumVerilatorNICSim(sim_pcidev.NICSim):
     def __init__(self, simulation: sim_base.Simulation):
         super().__init__(
             simulation=simulation,
-            # executable="/corundum_src/adapter/corundum_simbricks_adapter",
-            executable="../workspaces/simbricks-examples-tmp/corundum_legacy/rtl_model/corundum_verilator",
+            executable="../corundum_src/rtl_model/corundum_verilator",
         )
         self.name = f"CorundumVerilatorNICSim-{self._id}"
         self.clock_freq = 250  # MHz
-        # self.clock_freq = 10  # MHz
 
     def resreq_mem(self) -> int:
         # this is a guess

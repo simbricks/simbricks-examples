@@ -59,7 +59,10 @@ static bool pci_terminated = false;
 static VerilatedVcdC *trace;
 #endif
 
-static volatile union SimbricksProtoPcieD2H *d2h_alloc(void);
+static volatile union SimbricksProtoPcieD2H *d2h_alloc(void)
+{
+  return SimbricksPcieIfD2HOutAlloc(&nicif.pcie, main_time);
+}
 
 static void sigint_handler(int dummy)
 {
@@ -617,8 +620,6 @@ static void poll_h2d(MMIOInterface &mmio)
     break;
 
   case SIMBRICKS_PROTO_PCIE_H2D_MSG_DEVCTRL:
-    break;
-
   case SIMBRICKS_PROTO_MSG_TYPE_SYNC:
     break;
 
@@ -632,11 +633,6 @@ static void poll_h2d(MMIOInterface &mmio)
   }
 
   SimbricksPcieIfH2DInDone(&nicif.pcie, msg);
-}
-
-static volatile union SimbricksProtoPcieD2H *d2h_alloc(void)
-{
-  return SimbricksPcieIfD2HOutAlloc(&nicif.pcie, main_time);
 }
 
 class EthernetTx
@@ -891,43 +887,6 @@ static enum SimbricksBaseIfSyncMode GetSyncMode(bool sync)
 
 int main(int argc, char *argv[])
 {
-  //   char *vargs[2] = {argv[0], NULL};
-  //   Verilated::commandArgs(1, vargs);
-  //   struct SimbricksBaseIfParams netParams;
-  //   struct SimbricksBaseIfParams pcieParams;
-  // #ifdef TRACE_ENABLED
-  //   Verilated::traceEverOn(true);
-  // #endif
-
-  //   SimbricksNetIfDefaultParams(&netParams);
-  //   SimbricksPcieIfDefaultParams(&pcieParams);
-
-  //   if (argc < 4 && argc > 10)
-  //   {
-  //     fprintf(stderr,
-  //             "Usage: corundum_verilator PCI-SOCKET ETH-SOCKET "
-  //             "SHM [SYNC-MODE] [START-TICK] [SYNC-PERIOD] [PCI-LATENCY] "
-  //             "[ETH-LATENCY] [CLOCK-FREQ-MHZ]\n");
-  //     return EXIT_FAILURE;
-  //   }
-  //   if (argc >= 6)
-  //     main_time = strtoull(argv[5], NULL, 0);
-  //   if (argc >= 7)
-  //     netParams.sync_interval = pcieParams.sync_interval =
-  //         strtoull(argv[6], NULL, 0) * 1000ULL;
-  //   if (argc >= 8)
-  //     pcieParams.link_latency = strtoull(argv[7], NULL, 0) * 1000ULL;
-  //   if (argc >= 9)
-  //     netParams.link_latency = strtoull(argv[8], NULL, 0) * 1000ULL;
-  //   if (argc >= 10)
-  //     clock_period = 1000000ULL / strtoull(argv[9], NULL, 0);
-
-  char *vargs[2] = {argv[0], NULL};
-  Verilated::commandArgs(1, vargs);
-#ifdef TRACE_ENABLED
-  Verilated::traceEverOn(true);
-#endif
-
   struct SimbricksBaseIfParams netParams;
   struct SimbricksBaseIfParams pcieParams;
   struct SimbricksAdapterParams *pcieAdapterParams = nullptr;
@@ -994,7 +953,7 @@ int main(int argc, char *argv[])
   di.pci_revision = 0x00;
   di.pci_msi_nvecs = 32;
 
-  if (SimbricksNicIfInit(&nicif, argv[3], &netParams, &pcieParams, &di))
+  if (SimbricksNicIfInit(&nicif, shmPath, &netParams, &pcieParams, &di))
   {
     fprintf(stderr, "SimbricksNicIfInit Failed");
     return EXIT_FAILURE;
@@ -1008,6 +967,7 @@ int main(int argc, char *argv[])
 
   Vinterface *top = new Vinterface;
 #ifdef TRACE_ENABLED
+  Verilated::traceEverOn(true);
   trace = new VerilatedVcdC;
   top->trace(trace, 99);
   trace->open("debug.vcd");
@@ -1105,72 +1065,64 @@ int main(int argc, char *argv[])
 
   top->rst = 0;
 
-  try{
-  while (!exiting)
+  try
   {
-    int done;
-    do
+    while (!exiting)
     {
-      done = 1;
-      if (SimbricksPcieIfD2HOutSync(&nicif.pcie, main_time) < 0)
+      while (SimbricksNicIfSync(&nicif, main_time) < 0)
       {
-        // std::cerr << "warn: SimbricksPcieIfD2HOutSync failed (t=" << main_time
-        //           << ")" << std::endl;
-        done = 0;
+        fprintf(stderr,
+                "SimbricksPcieIfD2HOutSync or SimbricksNetIfOutSync failed (t=%lu)\n",
+                main_time);
       }
-      if (SimbricksNetIfOutSync(&nicif.net, main_time) < 0)
+
+      do
       {
-        // std::cerr << "warn: SimbricksNetIfOutSync failed (t=" << main_time
-        //           << ")" << std::endl;
-        done = 0;
-      }
-    } while (!done);
+        poll_h2d(mmio);
+        poll_n2d(rx);
 
-    do
-    {
-      poll_h2d(mmio);
-      poll_n2d(rx);
+      } while (
+          !exiting &&
+          ((sync_pci &&
+            SimbricksPcieIfH2DInTimestamp(&nicif.pcie) <= main_time) ||
+           (sync_eth && SimbricksNetIfInTimestamp(&nicif.net) <= main_time)));
 
-    } while (
-        !exiting &&
-        ((sync_pci &&
-          SimbricksPcieIfH2DInTimestamp(&nicif.pcie) <= main_time) ||
-         (sync_eth && SimbricksNetIfInTimestamp(&nicif.net) <= main_time)));
+      /* falling edge */
+      top->clk = !top->clk;
+      main_time += clock_period / 2;
+      top->eval();
 
-    /* falling edge */
-    top->clk = !top->clk;
-    main_time += clock_period / 2;
-    top->eval();
+      mmio.step();
 
-    mmio.step();
+      dma_read_ctrl.step();
+      dma_write_ctrl.step();
+      dma_read_data.step();
+      dma_write_data.step();
 
-    dma_read_ctrl.step();
-    dma_write_ctrl.step();
-    dma_read_data.step();
-    dma_write_data.step();
+      mem_control_writer.step();
+      mem_control_reader.step();
+      mem_data_writer.step();
+      mem_data_reader.step();
 
-    mem_control_writer.step();
-    mem_control_reader.step();
-    mem_data_writer.step();
-    mem_data_reader.step();
+      tx.step();
+      rx.step();
 
-    tx.step();
-    rx.step();
+      msi_step(*top, pci_coord_msi);
 
-    msi_step(*top, pci_coord_msi);
+      /* raising edge */
+      top->clk = !top->clk;
+      main_time += clock_period / 2;
 
-    /* raising edge */
-    top->clk = !top->clk;
-    main_time += clock_period / 2;
+      // top->s_axis_tx_ptp_ts_96 = main_time;
+      top->s_axis_tx_ptp_ts_valid = 1;
+      top->s_axis_rx_ptp_ts_valid = 1;
 
-    // top->s_axis_tx_ptp_ts_96 = main_time;
-    top->s_axis_tx_ptp_ts_valid = 1;
-    top->s_axis_rx_ptp_ts_valid = 1;
-
-    top->eval();
+      top->eval();
+    }
   }
-  } catch (char const* msg) {
-    fprintf(stderr, "ERROOOOOOOOOOOOR: %s\n", msg);
+  catch (char const *msg)
+  {
+    fprintf(stderr, "ERROR: %s\n", msg);
     fflush(stderr);
     return EXIT_FAILURE;
   }
