@@ -1,0 +1,10 @@
+obj_dir
+rtl_model/corundum_verilator
+behavioral_model/corundum_bm
+mqnic_driver/*.cmd
+mqnic_driver/*.ko
+mqnic_driver/*.mod
+mqnic_driver/*.mod*
+mqnic_driver/*.order
+mqnic_driver/*.symvers
+
