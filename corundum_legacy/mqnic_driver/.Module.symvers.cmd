@@ -1,0 +1,1 @@
+cmd_/workspaces/simbricks-examples-tmp/corundum_legacy/mqnic_driver/Module.symvers := sed 's/\.ko$$/\.o/' /workspaces/simbricks-examples-tmp/corundum_legacy/mqnic_driver/modules.order | scripts/mod/modpost -m -a  -o /workspaces/simbricks-examples-tmp/corundum_legacy/mqnic_driver/Module.symvers -e    -w -T -
