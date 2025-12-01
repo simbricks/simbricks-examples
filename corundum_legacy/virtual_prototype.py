@@ -106,8 +106,8 @@ sim = sim_helpers.simple_simulation(
     syst,
     compmap={
         system.FullSystemHost: simulation.QemuSim,
-        # swith this to CorundumVerilatorNICSim to use the RTL simulation
-        co.CorundumNIC: co.CorundumVerilatorNICSim,
+        # swith this to CorundumVerilatorNICSim to use the RTL/Verilator model
+        co.CorundumNIC: co.CorundumBMNICSim,
         system.EthSwitch: simulation.SwitchNet,
     },
 )
