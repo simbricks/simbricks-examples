@@ -31,7 +31,7 @@ Import the orchestration bits we created as part of the Corundum integration.
 Note that we must use the name of the package as present within the Docker Container
 used by the Runner.
 """
-from orchestration import corundum_orchestration_legacy as co
+from orchestration_corundum_legacy import corundum_orchestration as co
 
 
 """
