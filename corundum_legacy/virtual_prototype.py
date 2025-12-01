@@ -41,7 +41,13 @@ instantiations = []
 
 
 """
-System Specification
+System Specification:
+
++---------------------------+       +----------------------------+       +---------+       +----------------------------+       +---------------------------+
+| Client Host               | <-->  | Client NIC                 | <-->  | Switch  | <-->  | Server NIC                 | <-->  | Server Host               |
+| (Linux + Corundum DRIVER) |       | (Corundum RTL/Behavioral)  |       |         |       | (Corundum RTL/Behavioral)  |       | (Linux + Corundum DRIVER) |
++---------------------------+       +----------------------------+       +---------+       +----------------------------+       +---------------------------+
+
 """
 syst = system.System(name="corundum")
 
@@ -100,10 +106,13 @@ sim = sim_helpers.simple_simulation(
     syst,
     compmap={
         system.FullSystemHost: simulation.QemuSim,
+        # swith this to CorundumVerilatorNICSim to use the RTL simulation
         co.CorundumNIC: co.CorundumVerilatorNICSim,
         system.EthSwitch: simulation.SwitchNet,
     },
 )
+# optionally enable synchronization
+# sim.enable_synchronization()
 
 """
 Instantiation
