@@ -88,6 +88,27 @@ mybinder](https://mybinder.org/v2/gh/simbricks/labs/main?urlpath=git-pull%3Frepo
 Within the `netwroking-case-study` folder you will find SimBricks examples that demonstrates how to leverage SimBricks orchestration framework to create increasingly complex virtual prototypes of network topologies.
 It makes use of the concepts shown in the FirstSteps example and shows a simple setup in which multiple components of a virtual prototype are simulated by the same simulator. 
 
+## Corundum
+
+The Corundum examples showcases the integration of the open-source, high-performance FPGA-based Corundum NIC.
+
+## Data Center
+
+Example that showcases how SimBricks can be used to consisting of one spine switch and a number of racks.
+Each rack contains a TOR switch and a mix of abstractly simulated hosts for background traffic that are simulated in ns-3 and hosts
+simulated in QEMU that each are connected to a dedicated NIC simulator. The QEMU hosts run a full Linux stack and execute Iperf.
+The topology created looks as depicted [here](https://github.com/simbricks/simbricks-examples/blob/main/data-center/topology.png).
+
+## Programmatic API Demo
+
+SimBricks orchestration framework is written in Python. This makes it easy to write convenience functions yourself to share orchestration bits across experiments.
+Besides, SimBricks allows you to run your virtual prototype through python directly. This is useful in order to retrieve the simulation ourput line by line in python for parsing and testing.
+In the Api demo you can see simple examples for this.
+
+# Questions
+
+In case you have any questions regarding one of the examples, SimBricks in general or how you can use SimBricks in your workflow feel free to [reach out directly to us](https://www.simbricks.io/about.html) or open a issue in the [simbricks main repository](https://github.com/simbricks/simbricks/issues). 
+
 <!-- ## Example: Custom Images
 Any non-trivial project will typically require you to set up custom disk images
 for your simulated hosts to install necessary software dependencies and tools.
