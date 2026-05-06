@@ -1,3 +1,4 @@
 simbricks-client
 simbricks-cli
 simbricks-orchestration
+matplotlib
