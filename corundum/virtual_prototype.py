@@ -43,7 +43,7 @@ instantiations = []
 """
 System Specification
 """
-syst = system.System()
+syst = system.System("Corundum-Example")
 
 # create disk images
 distro_disk_image = system.DistroDiskImage(syst, "base")
@@ -113,6 +113,6 @@ instance = inst_helpers.simple_instantiation(sim)
 # Here we ensure that the runner does choose a proper docker image (the image defined in this repository)
 # for executing the fragment we created.
 fragment = instance.fragments[0]
-fragment._fragment_executor_tag = "corundum_executor"
+fragment.fragment_executor_tag = "corundum_executor"
 
 instantiations.append(instance)
