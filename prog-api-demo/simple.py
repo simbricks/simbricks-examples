@@ -20,8 +20,11 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from simbricks.orchestration import simulation as sim
 from simbricks.orchestration import system
+from simbricks.components.i40e import system as i40e_sys
+from simbricks.components.qemu import simulation as qemu_sim
+from simbricks.components.net.simulation import base as net_sim
+from simbricks.components.i40e.simulation import behavioral as i40e_sim
 from simbricks.orchestration.helpers import instantiation as inst_helpers
 from simbricks.orchestration.helpers import simulation as sim_helpers
 from helpers import sys_host_nic
@@ -73,9 +76,9 @@ Simulation configuration
 simulation = sim_helpers.simple_simulation(
     sys,
     compmap={
-        system.FullSystemHost: sim.QemuSim,
-        system.IntelI40eNIC: sim.I40eNicSim,
-        system.EthSwitch: sim.SwitchNet,
+        system.FullSystemHost: qemu_sim.QemuSim,
+        i40e_sys.IntelI40eNIC: i40e_sim.I40eNicSim,
+        system.EthSwitch: net_sim.SwitchNet,
     },
 )
 # Optionally enable synchronization

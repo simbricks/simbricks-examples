@@ -22,16 +22,18 @@
 
 
 from simbricks.orchestration import system
-from simbricks.orchestration import simulation
+from simbricks.components.qemu import simulation as qemu_sim
+from simbricks.components.net.simulation import base as net_sim
 from simbricks.orchestration.helpers import simulation as sim_helpers
 from simbricks.orchestration.helpers import instantiation as inst_helpers
 
 """
-Import the orchestration bits we created as part of the Corundum integration.
-Note that we must use the name of the package as present within the Docker Container
-used by the Runner.
+Import the orchestration bits of the Corundum integration. These are provided by the
+simbricks-corundum-sys-py and simbricks-corundum-sim-rtl-py conda packages, which are built
+from https://github.com/simbricks/component-corundum.
 """
-from orchestration import corundum_orchestration as co
+from simbricks.components.corundum import system as corundum_sys
+from simbricks.components.corundum import simulation as corundum_sim
 
 
 """
@@ -45,27 +47,30 @@ System Specification
 """
 syst = system.System("Corundum-Example")
 
-# create disk images
+# Create disk images. Note that CorundumLinuxHost below only declares that the guest must load
+# the mqnic driver, it does not provide the driver itself. The image referenced here must
+# therefore already contain the mqnic kernel module. Such an image is built with
+# https://github.com/simbricks/image-builder by including its install-mqnic.sh stage.
 distro_disk_image = system.DistroDiskImage(syst, "base")
 
 # create client
-host0 = co.CorundumLinuxHost(syst)
+host0 = corundum_sys.CorundumLinuxHost(syst)
 host0.name = "client-Host"
 host0.add_disk(distro_disk_image)
 host0.add_disk(system.LinuxConfigDiskImage(syst, host0))
 # create client NIC
-nic0 = co.CorundumNIC(syst)
+nic0 = corundum_sys.CorundumNIC(syst)
 nic0.name = "client-NIC"
 nic0.add_ipv4("10.0.0.1")
 host0.connect_pcie_dev(nic0)
 
 # create server
-host1 = co.CorundumLinuxHost(syst)
+host1 = corundum_sys.CorundumLinuxHost(syst)
 host1.name = "server-Host"
 host1.add_disk(distro_disk_image)
 host1.add_disk(system.LinuxConfigDiskImage(syst, host1))
 # create server NIC
-nic1 = co.CorundumNIC(syst)
+nic1 = corundum_sys.CorundumNIC(syst)
 nic1.name = "server-NIC"
 nic1.add_ipv4("10.0.0.2")
 host1.connect_pcie_dev(nic1)
@@ -99,9 +104,9 @@ Simulator Choice
 sim = sim_helpers.simple_simulation(
     syst,
     compmap={
-        system.FullSystemHost: simulation.QemuSim,
-        co.CorundumNIC: co.CorundumVerilatorNICSim,
-        system.EthSwitch: simulation.SwitchNet,
+        system.FullSystemHost: qemu_sim.QemuSim,
+        corundum_sys.CorundumNIC: corundum_sim.CorundumVerilatorNICSim,
+        system.EthSwitch: net_sim.SwitchNet,
     },
 )
 
@@ -110,8 +115,8 @@ sim = sim_helpers.simple_simulation(
 Instantiation
 """
 instance = inst_helpers.simple_instantiation(sim)
-# Here we ensure that the runner does choose a proper docker image (the image defined in this repository)
-# for executing the fragment we created.
+# Here we ensure that the fragment we created is executed by a runner that has the Corundum
+# simulator available, i.e. one on which the Corundum conda packages are installed.
 fragment = instance.fragments[0]
 fragment.fragment_executor_tag = "corundum_executor"
 

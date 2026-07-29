@@ -22,6 +22,11 @@
 
 
 from simbricks.orchestration import system
+from simbricks.components.i40e import system as i40e_sys
+from simbricks.components.qemu import simulation as qemu_sim
+from simbricks.components.gem5 import simulation as gem5_sim
+from simbricks.components.ns3 import simulation as net_sim
+from simbricks.components.i40e.simulation import behavioral as i40e_sim
 from simbricks.orchestration import simulation
 from simbricks.orchestration.helpers import instantiation as inst_helpers
 from simbricks.utils import base as utils_base
@@ -36,10 +41,10 @@ instantiations = []
 """
 PARAMETERS
 """
-sys_nic = system.IntelI40eNIC
-sys_host = system.I40ELinuxHost
+sys_nic = i40e_sys.IntelI40eNIC
+sys_host = i40e_sys.I40ELinuxHost
 
-sim_nic = simulation.I40eNicSim
+sim_nic = i40e_sim.I40eNicSim
 amount_qemu_sims = 1
 amount_gem_5_sims = 1
 
@@ -122,7 +127,7 @@ sim = simulation.Simulation(name="Milestone-3-simulation", system=syst)
 
 for index, host in enumerate(hosts, 1):
     sim_class = (
-        simulation.Gem5Sim if index <= amount_gem_5_sims * 2 else simulation.QemuSim
+        gem5_sim.Gem5Sim if index <= amount_gem_5_sims * 2 else qemu_sim.QemuSim
     )
     host_inst = sim_class(sim)
     host_inst.add(host)
@@ -131,7 +136,7 @@ for nic in nics:
     nic_inst = sim_nic(simulation=sim)
     nic_inst.add(nic)
 
-net_inst = simulation.NS3Net(sim)
+net_inst = net_sim.NS3Net(sim)
 net_inst.add(switch_1)
 net_inst.add(switch_2)
 
