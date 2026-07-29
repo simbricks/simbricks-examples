@@ -2,13 +2,57 @@
 
 [Corundum](https://github.com/corundum/corundum) is an open-source, high-performance FPGA-based NIC and platform for in-network compute.
 
-In this example we showcase how one can integrate Corundum (or for that matter similar projects) into SimBricks.
-We showcase the integration using [Verilator](https://www.veripool.org/verilator/) to simulate the actual RTL of Corundum.
+This folder contains **an example virtual prototype that uses Corundum**, not the integration itself.
+The actual SimBricks integration — the Verilator adapter, the orchestration classes and the build of the
+`mqnic` Linux driver — lives in its own repository,
+[simbricks/component-corundum](https://github.com/simbricks/component-corundum). The python orchestration bits from there are installed as a pip package. That is why this folder only holds a single experiment script.
 
-## Running a Virtual Prototype that uses Corundum
+## What This Example Does
 
-As part of the access to the orchestration demo, you can submit a SimBricks Virtual Prototype for execution 
-to our runner, that makes use of the Corundum integration shown in this example.
+[`virtual_prototype.py`](virtual_prototype.py) describes two Linux hosts, each simulated in QEMU and each
+connected to its own Corundum NIC over PCIe. The NICs are simulated at the RTL level with
+[Verilator](https://www.veripool.org/verilator/), so the actual Corundum Verilog is executed. Both NICs are
+attached to a SimBricks Ethernet switch. The client host pings the server host 20 times and then unloads the
+`mqnic` driver; the server just waits.
+
+## Prerequisites
+
+**1. The Corundum simulator must be available to the runner.**
+
+The Corundum pip packages (`simbricks-corundum-sys-py` and `simbricks-corundum-sim-rtl-py`) provide the orchestration classes used in the script. On runner side, users must use the `simbricks-corundum-sim-rtl-bin` conda package to use the `simb_corundum` simulator binary. The script
+selects such a runner via the executor tag on its fragment:
+
+```python
+fragment.fragment_executor_tag = "corundum_executor"
+```
+
+**2. The disk image must contain the `mqnic` driver.**
+
+`CorundumLinuxHost` only *declares* that the guest has to load the `mqnic` kernel module — it does not put
+the module into the image. The module has to already be present in the Linux image the hosts boot, which the
+script picks with:
+
+```python
+distro_disk_image = system.DistroDiskImage(syst, "base")
+```
+
+That image is built with [simbricks/image-builder](https://github.com/simbricks/image-builder). Its
+`examples/corundum/install-mqnic.sh` stage clones `component-corundum` inside the guest, builds the driver
+against the image's kernel and installs it, so appending that stage to an image build is what makes the
+image usable here:
+
+```sh
+make image EXTRA_SCRIPTS="examples/corundum/install-mqnic.sh"
+```
+
+If you run against the SimBricks cloud, the `base` image already ships with the driver installed and there
+is nothing to do. If you build images yourself, make sure the image you reference went through that stage —
+otherwise the hosts boot fine but fail to bring up the NIC.
+
+## Running the Example
+
+As part of the access to the orchestration demo, you can submit a SimBricks Virtual Prototype for execution
+to our runner, that makes use of the Corundum integration.
 
 In order to do so you can simply run the following:
 
@@ -16,50 +60,17 @@ In order to do so you can simply run the following:
 simbricks-cli runs submit -f virtual_prototype.py
 ```
 
-## The SimBricks Integration
+## Where the Integration Lives
 
-The actual integration of Corundum can be found in this example folder. 
-If you want to learn more about SimBricks Adapters and on how to integrate simulators into SimBricks, 
-check out our [documentation](https://simbricks.readthedocs.io/en/latest/learn/simulator-integration/index.html).
+This example folder previously contained the whole integration. Everything has moved to
+[simbricks/component-corundum](https://github.com/simbricks/component-corundum):
 
-Conceptually the Corundum integration consists of the following pieces:
+| Used to be here | Now |
+|---|---|
+| `adapter/corundum_simbricks_adapter.cpp` | `adapter/` in `component-corundum`, built and installed as the `simb_corundum` binary |
+| `orchestration/corundum_orchestration.py` | the `simbricks.components.corundum.system` and `simbricks.components.corundum.simulation` packages |
+| `Makefile` (verilate Corundum, build the `mqnic` driver) | `component-corundum`'s `Makefile` |
+| `Dockerfile` (executor image carrying the integration) | conda packages installed on the runner |
 
-1) `adapter/corundum_simbricks_adapter.cpp`:
-
-    Within this `corundum_simbricks_adapter.cpp` you can find the actual SimBricks simulator adapter. In this case, the adapter is also the driver of the Corundum simulation. FOr this the Adapter imports the header file representing the top level module of the design under test (DUT) that was created by compiling Corundum using verilator.
-
-2) `orchestration/corundum_orchestration.py`:
-
-    This is a python wrapper around Corundums Adapter. It is essentially an extension to SimBricks orchestration framework and is used to define your virtual prototypes and to submit as well as execute you Virtual Prototypes.
-
-    In this case it consists of a Corundum NIC (`CorundumNIC`) and a Corundum linux host (`CorundumLinuxHost`) system component used to describe the topology of a Virtual Prototype. Additionally the orchestration defines a simulation component (`CorundumVerilatorNICSim`) that represents a simulator choice for the system component. The simulation component does also make use of the compiled cpp adapter mentioned before.
-
-3) `Dockerfile`:
-
-    The Dockerfile is an environment that makes the integration available. It creates an linux image and uses the `Makefile` from this example to compile Corundum using Verilator, to compile the Corundum linux driver, 
-    it compiles the cpp Adapter that we mentioned before and makes the python orchestration available.
-
-    When you simply build this Dockerfile, you could simply run it locally to execute the given Virtual Prototype on your machine:
-
-    ```
-    $ docker image build --no-cache -t corundum_example_image .
-    $ docker run --entrypoint /bin/bash -it --rm --device=/dev/kvm corundum_example_image:latest
-    container$ simbricks-run --verbose /corundum_src/virtual_prototype.py
-    ```
-
-    When looking closely at the Dockerfile one might notice that it inherits from the `simbricks/simbricks-executor`
-    docker image. Therefore, this docker image can be given to SimBricks Runners that can use it. 
-    This is a way to make respective Runners the Corundum integration available, such that a virtual prototypes that uses Corundum can be executed in the SimBricks cloud.
-    This is also how we made the Corundum integration available in this demo.
-
-
-## Setup
-
-If you are using the provided devcontainer you are ready to go.
-
-In case you are not, you need to make the python orchestration we created as part of the Corundum integration available.
-For this you could e.g. add the current working directory (assuming you are in the same directory as this README) to you `PYTHONPATH`: 
-
-```
-export PYTHONPATH=$(pwd)
-```
+If you want to learn more about SimBricks Adapters and on how to integrate simulators into SimBricks, check
+out our [documentation](https://simbricks.readthedocs.io/en/latest/learn/simulator-integration/index.html).

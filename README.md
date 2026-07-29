@@ -90,7 +90,10 @@ It makes use of the concepts shown in the FirstSteps example and shows a simple 
 
 ## Corundum
 
-The Corundum examples showcases the integration of the open-source, high-performance FPGA-based Corundum NIC.
+The `corundum` folder contains an example that uses the open-source, high-performance FPGA-based Corundum NIC, whose RTL is simulated with Verilator.
+The integration itself is not part of this repository. It lives in [simbricks/component-corundum](https://github.com/simbricks/component-corundum) and is installed as a set of conda packages, so only the experiment remains here.
+Note that the example requires a Linux disk image containing Corundum's `mqnic` driver.
+See [corundum/README.md](corundum/README.md) for the details.
 
 ## Data Center
 

@@ -2,7 +2,11 @@ import ipaddress
 import random
 from simbricks.orchestration import system
 from simbricks.orchestration import simulation as sim
-from simbricks.orchestration.simulation.net import ns3_components
+from simbricks.components.i40e import system as i40e_sys
+from simbricks.components.qemu import simulation as qemu_sim
+from simbricks.components.ns3 import simulation as ns3_sim
+from simbricks.components.ns3.simulation import ns3_components as ns3_comp
+from simbricks.components.i40e.simulation import behavioral as i40e_sim
 from simbricks.orchestration import instantiation as inst
 from simbricks.orchestration.helpers import instantiation as inst_helpers
 from simbricks.orchestration.helpers import system as sys_helpers
@@ -92,13 +96,13 @@ for i_tor_switch in range(N_RACKS):
     rack_hosts = []
     for i_host in range(N_DETAILED_HOSTS_PER_RACK):
         # create a host instance and a NIC instance then install the NIC on the host
-        sys_host = system.I40ELinuxHost(sys)
+        sys_host = i40e_sys.I40ELinuxHost(sys)
         sys_host.name = f"Detailed Host-{i_tor_switch}-{i_host}"
         host = Host(sys_host)
         sys_host.add_disk(distro_disk_image)
         sys_host.add_disk(system.LinuxConfigDiskImage(sys, sys_host))
 
-        nic = system.IntelI40eNIC(sys)
+        nic = i40e_sys.IntelI40eNIC(sys)
         sys_host.connect_pcie_dev(nic)
         host.nic = nic
 
@@ -136,7 +140,7 @@ for i in range(N_RACKS * N_NS3_HOSTS_PER_RACK // 2):
 
     on_off_app = system.Application(host1.host)
     on_off_app.parameters["type_id"] = "ns3::OnOffApplication"
-    on_off_time = ns3_components.E2ENS3UniformRandomVariable()
+    on_off_time = ns3_comp.E2ENS3UniformRandomVariable()
     on_off_time.min = 1
     on_off_time.max = 5
     on_off_app.parameters["ns3_params"] = {
@@ -173,15 +177,15 @@ simulation = sim.Simulation(name="simple-data-center", system=sys)
 for i_tor_switch in range(N_RACKS):
     for i_host in range(N_DETAILED_HOSTS_PER_RACK):
         host = detailed_hosts[i_tor_switch][i_host]
-        host_inst = sim.QemuSim(simulation)
+        host_inst = qemu_sim.QemuSim(simulation)
         host_inst.add(host.host)
         host_inst.name = f"Qemu-Host-{i_tor_switch}-{i_host}"
 
-        nic_inst = sim.I40eNicSim(simulation=simulation)
+        nic_inst = i40e_sim.I40eNicSim(simulation=simulation)
         nic_inst.add(host.nic)
 
 # Simulate the rest of the system with ns-3
-net_inst = sim.NS3Net(simulation)
+net_inst = ns3_sim.NS3Net(simulation)
 net_inst.add(spine_switch)
 for i_tor_switch in range(N_RACKS):
     net_inst.add(tor_switches[i_tor_switch][0])

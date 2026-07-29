@@ -22,7 +22,10 @@
 
 
 from simbricks.orchestration import system
-from simbricks.orchestration import simulation
+from simbricks.components.i40e import system as i40e_sys
+from simbricks.components.qemu import simulation as qemu_sim
+from simbricks.components.net.simulation import base as net_sim
+from simbricks.components.i40e.simulation import behavioral as i40e_sim
 from simbricks.orchestration.helpers import simulation as sim_helpers
 from simbricks.orchestration.helpers import instantiation as inst_helpers
 
@@ -42,20 +45,20 @@ syst = system.System()
 distro_disk_image = system.DistroDiskImage(syst, "base")
 
 # create client
-host0 = system.I40ELinuxHost(syst)
+host0 = i40e_sys.I40ELinuxHost(syst)
 host0.add_disk(distro_disk_image)
 host0.add_disk(system.LinuxConfigDiskImage(syst, host0))
 # create client NIC
-nic0 = system.IntelI40eNIC(syst)
+nic0 = i40e_sys.IntelI40eNIC(syst)
 nic0.add_ipv4("10.0.0.1")
 host0.connect_pcie_dev(nic0)
 
 # create server
-host1 = system.I40ELinuxHost(syst)
+host1 = i40e_sys.I40ELinuxHost(syst)
 host1.add_disk(distro_disk_image)
 host1.add_disk(system.LinuxConfigDiskImage(syst, host1))
 # create server NIC
-nic1 = system.IntelI40eNIC(syst)
+nic1 = i40e_sys.IntelI40eNIC(syst)
 nic1.add_ipv4("10.0.0.2")
 host1.connect_pcie_dev(nic1)
 
@@ -79,9 +82,9 @@ Simulator Choice
 sim = sim_helpers.simple_simulation(
     syst,
     compmap={
-        system.FullSystemHost: simulation.QemuSim,
-        system.IntelI40eNIC: simulation.I40eNicSim,
-        system.EthSwitch: simulation.SwitchNet,
+        system.FullSystemHost: qemu_sim.QemuSim,
+        i40e_sys.IntelI40eNIC: i40e_sim.I40eNicSim,
+        system.EthSwitch: net_sim.SwitchNet,
     },
 )
 

@@ -21,6 +21,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from simbricks.orchestration import system
+from simbricks.components.i40e import system as i40e_sys
 import re
 
 """
@@ -29,13 +30,13 @@ Helper functions that are used within the other files in this folder.
 
 # Custom defined helper function to create an 'I40ELinuxHost' attached to an 'IntelI40eNIC'.
 def sys_host_nic(sys, image, ip, hn=None, nn=None):
-    host = system.I40ELinuxHost(sys)
+    host = i40e_sys.I40ELinuxHost(sys)
     host.add_disk(image)
     host.add_disk(system.LinuxConfigDiskImage(sys, host))
     if hn:
         host.name = hn
 
-    nic = system.IntelI40eNIC(sys)
+    nic = i40e_sys.IntelI40eNIC(sys)
     nic.add_ipv4(ip)
     host.connect_pcie_dev(nic)
     if nn:
