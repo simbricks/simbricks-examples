@@ -115,9 +115,5 @@ sim = sim_helpers.simple_simulation(
 Instantiation
 """
 instance = inst_helpers.simple_instantiation(sim)
-# Here we ensure that the fragment we created is executed by a runner that has the Corundum
-# simulator available, i.e. one on which the Corundum conda packages are installed.
-fragment = instance.fragments[0]
-fragment.fragment_executor_tag = "corundum_executor"
 
 instantiations.append(instance)
