@@ -94,3 +94,6 @@ Instantiation
 """
 instance = inst_helpers.simple_instantiation(sim)
 instantiations.append(instance)
+
+# import json
+# print(json.dumps(sim.toJSON(), indent=2))
