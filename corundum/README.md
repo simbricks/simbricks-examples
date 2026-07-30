@@ -19,12 +19,7 @@ attached to a SimBricks Ethernet switch. The client host pings the server host 2
 
 **1. The Corundum simulator must be available to the runner.**
 
-The Corundum pip packages (`simbricks-corundum-sys-py` and `simbricks-corundum-sim-rtl-py`) provide the orchestration classes used in the script. On runner side, users must use the `simbricks-corundum-sim-rtl-bin` conda package to use the `simb_corundum` simulator binary. The script
-selects such a runner via the executor tag on its fragment:
-
-```python
-fragment.fragment_executor_tag = "corundum_executor"
-```
+The Corundum pip packages (`simbricks-corundum-sys-py` and `simbricks-corundum-sim-rtl-py`) provide the orchestration classes used in the script. On runner side, users must use the `simbricks-corundum-sim-rtl-bin` conda package to use the `simb_corundum` simulator binary. Our demo Runner has the  `simbricks-corundum-sim-rtl-bin` conda package installed. 
 
 **2. The disk image must contain the `mqnic` driver.**
 
