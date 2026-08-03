@@ -4,7 +4,9 @@ simbricks-orchestration
 simbricks-ns3-sim-py
 simbricks-qemu-sim-py
 simbricks-gem5-sim-py
+simbricks-i40e-sys-py
 simbricks-i40e-sim-bm-py
 simbricks-net-base-sim-py
+simbricks-corundum-sys-py
 simbricks-corundum-sim-rtl-py
 matplotlib
