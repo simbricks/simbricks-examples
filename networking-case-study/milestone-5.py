@@ -29,7 +29,6 @@ from simbricks.components.ns3 import simulation as net_sim
 from simbricks.components.i40e.simulation import behavioral as i40e_sim
 from simbricks.orchestration import simulation
 from simbricks.orchestration import instantiation
-from simbricks.utils import base as utils_base
 
 
 """
@@ -51,7 +50,7 @@ amount_gem_5_sims = 1
 synchronized = True
 
 link_rate = 200  # in Mbps
-link_latency = 5  # in ms
+link_latency = "5ms"
 
 num_ns3_host_pairs = 1
 
@@ -150,7 +149,7 @@ eth_2 = system.EthInterface(switch_2)
 switch_2.add_if(eth_2)
 switch_to_switch_chan = system.EthChannel(eth_1, eth_2)
 # adjust channel options
-switch_to_switch_chan.set_latency(link_latency, utils_base.Time.Milliseconds)
+switch_to_switch_chan.latency = link_latency
 # NOTE: these are NS3 specific parameter
 switch_to_switch_chan.parameters = {"data_rate": f"{link_rate}Mbps"}
 
@@ -178,7 +177,7 @@ for ns3_h in ns3_hosts:
     net_inst.add(ns3_h)
 
 if synchronized:
-    sim.enable_synchronization(amount=500, ratio=utils_base.Time.Nanoseconds)
+    sim.enable_synchronization("500ns")
 
 
 """
