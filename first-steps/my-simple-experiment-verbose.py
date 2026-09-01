@@ -30,7 +30,6 @@ from simbricks.components.net.simulation import base as net_sim
 from simbricks.components.i40e.simulation import behavioral as i40e_sim
 from simbricks.orchestration import simulation
 from simbricks.orchestration import instantiation
-from simbricks.utils import base as utils_base
 from simbricks.client.opus import base as opus_base
 
 
@@ -109,7 +108,7 @@ net_inst.add(switch)
 
 # if synchronized set, enable synchronization for all SimBricks channels
 if synchronized:
-    sim.enable_synchronization(amount=500, ratio=utils_base.Time.Nanoseconds)
+    sim.enable_synchronization("500ns")
 
 
 """
