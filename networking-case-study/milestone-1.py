@@ -28,7 +28,6 @@ from simbricks.components.net.simulation import base as net_sim
 from simbricks.components.i40e.simulation import behavioral as i40e_sim
 from simbricks.orchestration import simulation
 from simbricks.orchestration.helpers import instantiation as inst_helpers
-from simbricks.utils import base as utils_base
 
 
 """
@@ -110,7 +109,7 @@ net_inst = net_sim.SwitchNet(sim)
 net_inst.add(switch)
 
 if synchronized:
-    sim.enable_synchronization(amount=500, ratio=utils_base.Time.Nanoseconds)
+    sim.enable_synchronization("500ns")
 
 
 """
