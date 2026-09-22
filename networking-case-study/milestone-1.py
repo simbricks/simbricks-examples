@@ -55,7 +55,7 @@ System Specification
 syst = system.System()
 
 # create disk images
-distro_disk_image = system.DistroDiskImage(syst, "base")
+distro_disk_image = system.Ubuntu2204CustomKernelDiskImage(syst)
 
 # create client
 host0 = sys_host(syst)

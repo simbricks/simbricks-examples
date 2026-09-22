@@ -51,7 +51,7 @@ syst = system.System("Corundum-Example")
 # the mqnic driver, it does not provide the driver itself. The image referenced here must
 # therefore already contain the mqnic kernel module. Such an image is built with
 # https://github.com/simbricks/image-builder by including its install-mqnic.sh stage.
-distro_disk_image = system.DistroDiskImage(syst, "base")
+distro_disk_image = system.Ubuntu2204CustomKernelDiskImage(syst)
 
 # create client
 host0 = corundum_sys.CorundumLinuxHost(syst)

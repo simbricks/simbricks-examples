@@ -62,7 +62,7 @@ System Specification
 syst = system.System()
 
 # create disk images
-distro_disk_image = system.DistroDiskImage(syst, "base")
+distro_disk_image = system.Ubuntu2204CustomKernelDiskImage(syst)
 
 # create switch_1
 switch_1 = system.EthSwitch(syst)
