@@ -52,7 +52,7 @@ for rate in iperf_rates:
 
     # We create a Linux disk image instance that will be used by the hosts we create.
     # The image used here is provided by SimBricks, user can however also provide custom images.
-    distro_disk_image = system.DistroDiskImage(sys, "base")
+    distro_disk_image = system.Ubuntu2204CustomKernelDiskImage(sys)
 
     # Configure the server to start an Iperf server by adding an application to the server object.
     server_host, server_nic = sys_host_nic(

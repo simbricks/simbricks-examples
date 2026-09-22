@@ -28,7 +28,7 @@ the module into the image. The module has to already be present in the Linux ima
 script picks with:
 
 ```python
-distro_disk_image = system.DistroDiskImage(syst, "base")
+distro_disk_image = system.Ubuntu2204CustomKernelDiskImage(syst)
 ```
 
 That image is built with [simbricks/image-builder](https://github.com/simbricks/image-builder). Its
